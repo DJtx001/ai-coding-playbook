@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>从「能用」到「用好」· AI Coding 进阶教程</title>
+<style>
+  :root{
+    --ink:#2C2C2A; --ink2:#5F5E5A; --ink3:#888780;
+    --bg:#FFFFFF; --surface:#F7F6F3; --line:#E3E1DA;
+    --blue:#185FA5; --blue-bg:#E6F1FB;
+    --green:#3B6D11; --green-bg:#EAF3DE;
+    --amber:#854F0B; --amber-bg:#FAEEDA;
+    --red:#A32D2D; --red-bg:#FCEBEB;
+    --purple:#5B4A9E; --purple-bg:#EDE9FA;
+    --code-bg:#F5F4F0;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:48px 24px 96px;
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:15px; line-height:1.75;
+  }
+  .wrap{max-width:920px;margin:0 auto}
+  h1{font-size:30px;font-weight:500;margin:0 0 8px;letter-spacing:-0.01em}
+  .sub{color:var(--ink2);font-size:14px;margin:0 0 12px;padding-bottom:24px;border-bottom:1px solid var(--line)}
+  .aud{display:inline-block;font-size:13px;padding:4px 12px;border-radius:14px;background:var(--purple-bg);color:var(--purple);margin:0 0 28px}
+  h2{font-size:21px;font-weight:500;margin:56px 0 16px;padding-top:24px;border-top:1px solid var(--line)}
+  h2 .no{color:var(--ink3);font-weight:400;margin-right:8px}
+  h3{font-size:16px;font-weight:500;margin:28px 0 10px}
+  p{margin:0 0 14px}
+  ul,ol{margin:0 0 14px;padding-left:22px}
+  li{margin:4px 0}
+  strong{font-weight:600}
+  code{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:13px;background:var(--code-bg);padding:1px 5px;border-radius:4px}
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:0 0 18px}
+  pre code{background:none;padding:0;font-size:13px;line-height:1.6;white-space:pre}
+  table{border-collapse:collapse;width:100%;margin:0 0 20px;font-size:14px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--surface);font-weight:500}
+  .box{border-radius:10px;padding:14px 18px;margin:0 0 18px;border:1px solid var(--line);background:var(--surface)}
+  .box.info{background:var(--blue-bg);border-color:#B5D4F4}
+  .box.warn{background:var(--amber-bg);border-color:#FAC775}
+  .box.good{background:var(--green-bg);border-color:#C0DD97}
+  .box.bad{background:var(--red-bg);border-color:#F7C1C1}
+  .box.dark{background:var(--purple-bg);border-color:#C9BEEF}
+  .box p:last-child{margin-bottom:0}
+  .box ul:last-child,.box ol:last-child{margin-bottom:0}
+  .tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;background:var(--surface);border:1px solid var(--line);color:var(--ink2);margin-right:6px;white-space:nowrap}
+  .tag.b{background:var(--blue-bg);border-color:#B5D4F4;color:var(--blue)}
+  .tag.g{background:var(--green-bg);border-color:#C0DD97;color:var(--green)}
+  .tag.a{background:var(--amber-bg);border-color:#FAC775;color:var(--amber)}
+  .tag.r{background:var(--red-bg);border-color:#F7C1C1;color:var(--red)}
+  .tag.p{background:var(--purple-bg);border-color:#C9BEEF;color:var(--purple)}
+  .toc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin-bottom:36px}
+  .toc ol{margin:0;padding-left:20px;font-size:14px}
+  .toc a{color:var(--ink);text-decoration:none}
+  .toc a:hover{color:var(--blue)}
+  figure{margin:0 0 22px;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+  figure svg{display:block;width:100%;height:auto}
+  figure svg text{paint-order:stroke;stroke:#F7F6F3;stroke-width:4px;stroke-linejoin:round}
+  figcaption{font-size:13px;color:var(--ink3);margin-top:8px;text-align:center}
+  .vs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 18px}
+  .vs .card{border-radius:10px;padding:14px 16px;border:1px solid var(--line)}
+  .vs .card.bad-c{background:var(--red-bg);border-color:#F7C1C1}
+  .vs .card.good-c{background:var(--green-bg);border-color:#C0DD97}
+  .vs .card h4{margin:0 0 8px;font-size:14px;font-weight:600}
+  .vs .card.bad-c h4{color:var(--red)}
+  .vs .card.good-c h4{color:var(--green)}
+  .vs .card ul{margin:0;padding-left:18px;font-size:13.5px}
+  .steps{counter-reset:st}
+  .step-item{border-left:3px solid var(--blue);padding:2px 0 2px 18px;margin:0 0 22px}
+  .step-item h3{margin:0 0 8px}
+  .kicker{font-size:12px;letter-spacing:.08em;color:var(--ink3);text-transform:uppercase;margin-bottom:4px}
+  .gate{background:var(--red-bg);border:1px solid #F7C1C1;border-radius:8px;padding:10px 16px;margin:0 0 14px;font-size:14px}
+  .gate strong{color:var(--red)}
+  .kbd{font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 6px;background:var(--surface);font-family:Consolas,monospace}
+  @media (max-width:640px){.vs{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>从「能用」到「用好」</h1>
+<p class="sub">AI Coding 进阶教程 · 把「一句话让它写代码」升级为「一套可验证的工程流程」</p>
+<span class="aud">适合你：已经在用 AI 编码工具，但产出总要靠运气的人</span>
+
+<div class="box bad">
+<p><strong>你是否中招？</strong>以下任意一条命中，说明你还停在「用过」阶段：</p>
+<ul>
+<li>开一个新需求，第一句话永远是「帮我实现 XXX」</li>
+<li>AI 说「已完成」你就信了，运行才发现根本跑不通</li>
+<li>对话越拉越长，AI 开始遗忘早先的约束、顺手改你没让它改的文件</li>
+<li>生成质量全靠运气：好起来惊为天人，差起来一无是处，且你不知道差别在哪</li>
+<li>复盘时说不清「这次它为什么会写错」</li>
+</ul>
+</div>
+
+<div class="box good">
+<p><strong>一句话心智模型（本教程全文围绕它）</strong>：新手想的是「怎么让 AI 写出我要的代码」，高手想的是「怎么让 AI 的产出<strong>可以被验证</strong>」。每一步操作，都是把「看起来做完了」变成「能证明做完了」。</p>
+</div>
+
+<div class="toc">
+<strong>目录</strong>
+<ol>
+  <li><a href="#c1">第 1 章 · 心智模型升级：从生成到验证</a></li>
+  <li><a href="#c2">第 2 章 · 会话卫生：上下文是易腐资产</a></li>
+  <li><a href="#c3">第 3 章 · 路由：拿到需求先判走几步</a></li>
+  <li><a href="#c4">第 4 章 · 主干流程七步走</a>（拷问 → 规格 → 探现状 → 计划 → TDD → 验收 → 审查收尾）</li>
+  <li><a href="#c5">第 5 章 · 解剖一份真实配置：~/.claude 里该有什么</a></li>
+  <li><a href="#c6">第 6 章 · 翻车急救与红线</a></li>
+</ol>
+</div>
+
+<h2 id="c1"><span class="no">1</span>心智模型升级：从生成到验证</h2>
+
+<p>「用过但用得浅」的核心症状不是不会写提示词，而是<strong>整个工作流里没有验证环节</strong>。对比两种工作流：</p>
+
+<div class="vs">
+  <div class="card bad-c">
+    <h4>✗ 生成式工作流（大多数人的现状）</h4>
+    <ul>
+      <li>提需求 → AI 输出代码 → 看起来对就贴上</li>
+      <li>报错 → 把错误整段丢回去 → AI 补丁叠补丁</li>
+      <li>跑不起来 → 「再试一次」 → 上下文越陷越深</li>
+      <li>质量标准：AI 自己的声称（「已完成」「没问题」）</li>
+    </ul>
+  </div>
+  <div class="card good-c">
+    <h4>✓ 验证式工作流（本教程教的）</h4>
+    <ul>
+      <li>提需求前先<strong>拷问</strong>：边界、替代方案、不做什么</li>
+      <li>动手前先定<strong>验收清单</strong>：每条 = 一条命令 + 一个退出码</li>
+      <li>实现走 <strong>TDD</strong>：测试必须先红，亲眼见红才许写实现</li>
+      <li>完成前<strong>换个人验证</strong>：子代理只读核对，出示命令+输出</li>
+      <li>质量标准：证据，不接受任何口头保证</li>
+    </ul>
+  </div>
+</div>
+
+<p>这个转变不需要你学新工具，只需要在每个环节<strong>插入一个「证明」动作</strong>。后面各章给出的全是可操作的插入点。</p>
+
+<h2 id="c2"><span class="no">2</span>会话卫生：上下文是易腐资产</h2>
+
+<p>模型的工作记忆就是这段对话的全部。它不是硬盘，更像<strong> RAM——会腐烂</strong>。腐烂有三个可观测信号：</p>
+
+<figure>
+<svg viewBox="0 0 860 300" xmlns="http://www.w3.org/2000/svg" font-family="PingFang SC,Microsoft YaHei,sans-serif">
+  <text x="430" y="24" text-anchor="middle" font-size="14" fill="#2C2C2A" font-weight="600">上下文健康度随对话长度衰减</text>
+  <line x1="60" y1="250" x2="800" y2="250" stroke="#888780" stroke-width="1.5"/>
+  <text x="800" y="270" text-anchor="end" font-size="11" fill="#888780">对话长度 →</text>
+  <line x1="60" y1="250" x2="60" y2="50" stroke="#888780" stroke-width="1.5"/>
+  <text x="40" y="150" font-size="11" fill="#888780" transform="rotate(-90 46 150)">产出质量</text>
+  <path d="M60,70 C 250,72 380,80 470,120 C 560,160 660,210 780,238" stroke="#A32D2D" stroke-width="2.5" fill="none" stroke-dasharray="6 4"/>
+  <line x1="500" y1="50" x2="500" y2="250" stroke="#3B6D11" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <circle cx="330" cy="95" r="5" fill="#854F0B"/>
+  <path d="M330,95 L275,50" stroke="#854F0B" stroke-width="1" fill="none"/>
+  <text x="270" y="46" text-anchor="end" font-size="11" fill="#854F0B">信号一：开始重复你说过的要求</text>
+  <circle cx="620" cy="176" r="5" fill="#854F0B"/>
+  <path d="M620,176 L672,141" stroke="#854F0B" stroke-width="1" fill="none"/>
+  <text x="680" y="138" font-size="11" fill="#854F0B">信号二：顺手改你没让它改的地方</text>
+  <circle cx="716" cy="214" r="5" fill="#854F0B"/>
+  <path d="M716,214 L672,231" stroke="#854F0B" stroke-width="1" fill="none"/>
+  <text x="664" y="236" text-anchor="end" font-size="11" fill="#854F0B">信号三：为错误辩解而不是修</text>
+  <rect x="512" y="52" width="280" height="52" rx="8" fill="#EAF3DE" stroke="#C0DD97"/>
+  <text x="652" y="72" text-anchor="middle" font-size="12" fill="#3B6D11" font-weight="600">命中任一条 → 立刻停</text>
+  <text x="652" y="92" text-anchor="middle" font-size="12" fill="#3B6D11">写 HANDOFF.md → /clear 重开</text>
+</svg>
+<figcaption>三个信号都是「腐烂」而不是「能力不足」——继续硬聊只会更差，重启才是省钱解</figcaption>
+</figure>
+
+<h3>为什么是 /clear 而不是 /compact</h3>
+<p>压缩（compact）保留了连续性，但没有给模型一块干净的白板——模型「以为」自己快到上限就会提前收尾、降低质量（context anxiety）。<strong>长任务 = 短会话 + 结构化交接，而不是一个长会话反复压缩。</strong></p>
+
+<h3>HANDOFF.md 交接模板</h3>
+<p>停会话之前把「它其实没记住、新会话需要知道的东西」写下来，越像工单越好：</p>
+<pre><code># HANDOFF.md
+## 当前任务
+（一句话说在做什么）
+## 已完成
+- 步骤 1-3，产物：SPEC.md / 测试文件路径
+## 卡在哪
+- 第 4 步 X 原因，已排除 Y、Z 两种假设
+## 下一步
+- 从第 N 步继续，先读 SPEC.md 和 PLAN.md
+## 已知坑（勿再踩）
+- 例：api/client.ts 的 timeout 单位是秒不是毫秒</code></pre>
+
+<p>新会话第一句固定为：<code>读 SPEC.md、PLAN.md 和 HANDOFF.md，从第 N 步继续</code>。</p>
+
+<h3>日常会话微操</h3>
+<table>
+  <tr><th style="width:180px">动作</th><th>用途</th></tr>
+  <tr><td><span class="kbd">/rename 会话名</span></td><td>给会话命名，方便日后切回来</td></tr>
+  <tr><td><span class="kbd">/resume 会话名</span></td><td>切换到别的对话，开新支线</td></tr>
+  <tr><td><span class="kbd">/btw</span></td><td>顺手一问不污染主线上下文（问完即弃）</td></tr>
+  <tr><td><span class="kbd">/clear</span></td><td>清空重来——配合 HANDOFF 使用，是常规操作不是失败标志</td></tr>
+</table>
+
+<div class="box info">
+<p><strong>进阶隔离 · git worktree</strong>：要同时开两条互不干扰的任务线（比如一边重构一边修 bug），用 worktree 给每个会话一个<strong>物理隔离的工作目录</strong>，并发的子代理文件集再怎么重叠也撞不了车。</p>
+</div>
+
+<h2 id="c3"><span class="no">3</span>路由：拿到需求先判走几步</h2>
+
+<p>多数人翻车的另一根源：对所有需求用同一档力度——大需求轻率直做，小需求过度流程。<strong>判据不是改动大小，而是爆炸半径 + 你能不能在 30 秒内验证结果。</strong></p>
+
+<figure>
+<svg viewBox="0 0 860 330" xmlns="http://www.w3.org/2000/svg" font-family="PingFang SC,Microsoft YaHei,sans-serif">
+  <rect x="330" y="14" width="200" height="44" rx="10" fill="#E6F1FB" stroke="#B5D4F4"/>
+  <text x="430" y="41" text-anchor="middle" font-size="13" fill="#185FA5" font-weight="600">拿到需求，先问三件事</text>
+  <line x1="360" y1="58" x2="180" y2="106" stroke="#888780" stroke-width="1.5"/>
+  <line x1="430" y1="58" x2="430" y2="106" stroke="#888780" stroke-width="1.5"/>
+  <line x1="500" y1="58" x2="680" y2="106" stroke="#888780" stroke-width="1.5"/>
+  <rect x="70" y="106" width="220" height="42" rx="8" fill="#F7F6F3" stroke="#E3E1DA"/>
+  <text x="180" y="124" text-anchor="middle" font-size="12" fill="#2C2C2A">① 爆炸半径多大？</text>
+  <text x="180" y="140" text-anchor="middle" font-size="11" fill="#888780">被多少处引用 / 影响什么面</text>
+  <rect x="315" y="106" width="230" height="42" rx="8" fill="#F7F6F3" stroke="#E3E1DA"/>
+  <text x="430" y="124" text-anchor="middle" font-size="12" fill="#2C2C2A">② 能 30 秒内验证对错吗？</text>
+  <text x="430" y="140" text-anchor="middle" font-size="11" fill="#888780">一条命令 + 一个退出码</text>
+  <rect x="565" y="106" width="230" height="42" rx="8" fill="#F7F6F3" stroke="#E3E1DA"/>
+  <text x="680" y="124" text-anchor="middle" font-size="12" fill="#2C2C2A">③ 跨几个模块？</text>
+  <text x="680" y="140" text-anchor="middle" font-size="11" fill="#888780">单文件 / 单模块 / 跨模块</text>
+  <line x1="180" y1="148" x2="180" y2="190" stroke="#888780" stroke-width="1.5"/>
+  <line x1="430" y1="148" x2="430" y2="190" stroke="#888780" stroke-width="1.5"/>
+  <line x1="680" y1="148" x2="680" y2="190" stroke="#888780" stroke-width="1.5"/>
+  <rect x="60" y="190" width="240" height="56" rx="10" fill="#EAF3DE" stroke="#C0DD97"/>
+  <text x="180" y="212" text-anchor="middle" font-size="12.5" fill="#3B6D11" font-weight="600">直接做（跳过第 1-4 步）</text>
+  <text x="180" y="232" text-anchor="middle" font-size="11" fill="#3B6D11">小改动 + 能秒验 → 错了重来比修更快</text>
+  <rect x="315" y="190" width="230" height="56" rx="10" fill="#FAEEDA" stroke="#FAC775"/>
+  <text x="430" y="212" text-anchor="middle" font-size="12.5" fill="#854F0B" font-weight="600">轻量档：拷问+验收两步</text>
+  <text x="430" y="232" text-anchor="middle" font-size="11" fill="#854F0B">单模块 → 不写正式 SPEC，但要有验收清单</text>
+  <rect x="560" y="190" width="240" height="56" rx="10" fill="#E6F1FB" stroke="#B5D4F4"/>
+  <text x="680" y="212" text-anchor="middle" font-size="12.5" fill="#185FA5" font-weight="600">全流程档：七步全走</text>
+  <text x="680" y="232" text-anchor="middle" font-size="11" fill="#185FA5">跨模块/新功能 → 必写 SPEC，必过 plan mode</text>
+  <rect x="150" y="276" width="560" height="40" rx="8" fill="#FCEBEB" stroke="#F7C1C1"/>
+  <text x="430" y="301" text-anchor="middle" font-size="12" fill="#A32D2D">反例：改一个被 20 处引用的公共函数——哪怕只动一个文件，也不能「直接做」</text>
+</svg>
+<figcaption>路由三问决定力度档位：验证速度是唯一硬判据</figcaption>
+</figure>
+
+<div class="box warn">
+<p><strong>「直接做」的安全网</strong>：即便是最低档，也要遵守——改完立刻跑测试，绿了才 commit；测试不红反绿（本来就该过的用例挂了）说明改坏了，直接回滚重来。这一档快的前提是<strong>舍得扔</strong>。</p>
+</div>
+
+<h2 id="c4"><span class="no">4</span>主干流程七步走</h2>
+
+<p>下面进入全流程档的七步。先看一图流，再逐步展开。每一步都有一个共同主题：<strong>在声称之前，先要证据。</strong></p>
+
+<figure>
+<svg viewBox="0 0 880 210" xmlns="http://www.w3.org/2000/svg" font-family="PingFang SC,Microsoft YaHei,sans-serif">
+  <g font-size="12" text-anchor="middle">
+    <rect x="14"  y="52" width="104" height="56" rx="10" fill="#E6F1FB" stroke="#B5D4F4"/><text x="66" y="76" fill="#185FA5" font-weight="600">1 拷问需求</text><text x="66" y="94" font-size="10.5" fill="#5F5E5A">不写一行代码</text>
+    <rect x="136" y="52" width="104" height="56" rx="10" fill="#E6F1FB" stroke="#B5D4F4"/><text x="188" y="76" fill="#185FA5" font-weight="600">2 写 SPEC</text><text x="188" y="94" font-size="10.5" fill="#5F5E5A">验收清单第一</text>
+    <rect x="258" y="52" width="104" height="56" rx="10" fill="#EDE9FA" stroke="#C9BEEF"/><text x="310" y="76" fill="#5B4A9E" font-weight="600">3 子代理探现状</text><text x="310" y="94" font-size="10.5" fill="#5F5E5A">只读不改</text>
+    <rect x="380" y="52" width="104" height="56" rx="10" fill="#E6F1FB" stroke="#B5D4F4"/><text x="432" y="76" fill="#185FA5" font-weight="600">4 出计划</text><text x="432" y="94" font-size="10.5" fill="#5F5E5A">Ctrl+G 亲手改</text>
+    <rect x="502" y="52" width="104" height="56" rx="10" fill="#FAEEDA" stroke="#FAC775"/><text x="554" y="76" fill="#854F0B" font-weight="600">5 TDD 实现</text><text x="554" y="94" font-size="10.5" fill="#5F5E5A">不红不许写</text>
+    <rect x="624" y="52" width="104" height="56" rx="10" fill="#EAF3DE" stroke="#C0DD97"/><text x="676" y="76" fill="#3B6D11" font-weight="600">6 独立验收</text><text x="676" y="94" font-size="10.5" fill="#5F5E5A">换人来证明</text>
+    <rect x="746" y="52" width="118" height="56" rx="10" fill="#EAF3DE" stroke="#C0DD97"/><text x="805" y="76" fill="#3B6D11" font-weight="600">7 审查+收尾</text><text x="805" y="94" font-size="10.5" fill="#5F5E5A">坑固化成 skill</text>
+  </g>
+  <g stroke="#888780" stroke-width="1.5" fill="none">
+    <path d="M118,80 H132"/><path d="M240,80 H254"/><path d="M362,80 H376"/><path d="M484,80 H498"/><path d="M606,80 H620"/><path d="M728,80 H742"/>
+  </g>
+  <path d="M805,112 C 805,160 66,160 66,112" stroke="#3B6D11" stroke-width="1.5" stroke-dasharray="5 4" fill="none"/>
+  <text x="430" y="168" text-anchor="middle" font-size="11.5" fill="#3B6D11">任何一步上下文腐烂 → 写 HANDOFF → /clear → 「读 SPEC/PLAN/HANDOFF，从第 N 步继续」</text>
+  <rect x="122" y="26" width="120" height="22" rx="11" fill="#FCEBEB" stroke="#F7C1C1"/>
+  <text x="182" y="41" text-anchor="middle" font-size="10.5" fill="#A32D2D">闸门一 · 不红不许实现</text>
+  <rect x="612" y="26" width="128" height="22" rx="11" fill="#FCEBEB" stroke="#F7C1C1"/>
+  <text x="676" y="41" text-anchor="middle" font-size="10.5" fill="#A32D2D">闸门二 · 要证据不要保证</text>
+</svg>
+<figcaption>七步主干 + 两道硬闸门：所有步骤都在为「可验证」服务</figcaption>
+</figure>
+
+<h3 class="kicker">STEP 1</h3>
+<div class="step-item">
+<div class="kicker">拷打需求 · 不写一行代码</div>
+<h3>先当甲方，再当甲方</h3>
+<p>需求到手直接开写，是「浅用」的最典型形态——AI 会替你默默做一堆隐性假设，等代码出来你才发现双方理解根本不一致。正确动作是让 AI 先<strong>采访你</strong>：</p>
+<ul>
+<li><span class="tag p">skill</span><code>brainstorming</code>：发散，探清意图、约束和替代方案</li>
+<li><span class="tag p">skill</span><code>grilling</code>：收敛，像设计评审一样逐轮逼问，直到架构决策全部落定</li>
+</ul>
+<p>拷问的产物是一份「想清楚了」的共识——它直接决定第 2 步 SPEC 里「非目标」章节能写得多具体。<strong>这一步省一分钟，第 5 步还一小时。</strong></p>
+</div>
+
+<h3 class="kicker">STEP 2</h3>
+<div class="step-item">
+<div class="kicker">写 SPEC.md · 规格说明书</div>
+<h3>验收清单是 spec 的第一要素</h3>
+<p>判断一份 spec 是不是散文，只看一点：<strong>每条验收项能不能翻译成「一条命令 + 一个退出码/可见输出」。</strong>不能，就是没写完。按重要性排序的五节：</p>
+<table>
+  <tr><th style="width:150px">章节</th><th>写法要点</th></tr>
+  <tr><td>① 验收清单</td><td>可勾选、可命令化。<code>! pytest tests/x.py</code> → 退出码 0 才算过</td></tr>
+  <tr><td>② 边界与非目标</td><td>「不做什么」比「做什么」更防跑偏（例：不改 schema、不引新依赖）</td></tr>
+  <tr><td>③ 接口契约</td><td>函数签名、字段类型、错误码——并行与集成的地基</td></tr>
+  <tr><td>④ 现有约定</td><td>给 2-3 个样板文件路径，胜过十条抽象规则</td></tr>
+  <tr><td>⑤ 背景与目标</td><td>1-2 行，给人也给 agent 看</td></tr>
+</table>
+<div class="box info">
+<p><strong>为什么样板文件胜过抽象规则？</strong>抽象规则（「遵循项目风格」）每次解读都可能不同；具体文件路径是零歧义的锚点，agent 会自己去读并模仿。这也是后文「上下文指针」思想的第一次应用。</p>
+</div>
+</div>
+
+<h3 class="kicker">STEP 3</h3>
+<div class="step-item">
+<div class="kicker">派子 Agent 探现状 · 只读</div>
+<h3>读代码这件事，别用主会话</h3>
+<p>「这个改动会牵扯到哪些地方」需要读十几个文件——把这些全文读进主会话，上下文当场烂一半。派子代理去读，<strong>只回传结论</strong>：</p>
+<pre><code>调查 X 模块的现状：哪些文件引用了它、现有测试覆盖到哪、
+改动会波及哪些接口。只读，不改任何文件，返回结论清单。</code></pre>
+<p>多个独立调查可以同时派（<span class="tag p">skill</span><code>dispatching-parallel-agents</code>）；注意：子代理们的工作文件集若有重叠，必须配 worktree 物理隔离，否则互相覆盖。</p>
+</div>
+
+<h3 class="kicker">STEP 4</h3>
+<div class="step-item">
+<div class="kicker">出计划 · plan mode</div>
+<h3>八成问题在图纸阶段暴露，成本为零</h3>
+<ul>
+<li><span class="tag p">skill</span><code>writing-plans</code> 把 SPEC 拆成 PLAN：每一步标明哪些走 TDD、哪些直接写</li>
+<li>进入 plan mode：<span class="kbd">Shift+Tab</span> 循环权限模式直到 <code>⏸ plan mode on</code>，或 <span class="kbd">/plan 任务</span> 直达</li>
+<li>计划出来后 <span class="kbd">Ctrl+G</span> 丢进编辑器<strong>亲手改</strong>——这是全流程性价比最高的一分钟</li>
+<li>执行用 <span class="tag p">skill</span><code>executing-plans</code>：分批 checkpoint，每批停下验收；<span class="kbd">Ctrl+T</span> 看任务进度（跨上下文压缩存活）</li>
+<li>大批次想并行：换成 <span class="tag p">skill</span><code>subagent-driven-development</code>——计划拆给子代理执行，主代理只做验收</li>
+</ul>
+<p><strong>执行期报错分流</strong>（决定继续还是推倒，判据是「修复会不会动结构」）：</p>
+<table>
+  <tr><th style="width:250px">情况</th><th>动作</th></tr>
+  <tr><td>代码报错，原因不明</td><td><span class="tag p">skill</span><code>systematic-debugging</code> 查 bug；找不到为啥坏用 <code>root-cause-tracing</code>（只查不修）</td></tr>
+  <tr><td>定位了，一行能治（参数/条件/typo）</td><td>最小修复 + 回归测试验证</td></tr>
+  <tr><td>定位了，但要动结构 / 思路本身错了</td><td><span class="kbd">Esc+Esc</span> 回滚 → 更新 SPEC/PLAN（把根因和防再犯写进去）→ 重新生成</td></tr>
+  <tr><td>上下文脏了</td><td><span class="kbd">/clear</span> 重开，第一句「读 SPEC.md、PLAN.md、HANDOFF.md，从第 N 步继续」</td></tr>
+</table>
+</div>
+
+<h3 class="kicker">STEP 5</h3>
+<div class="step-item">
+<div class="kicker">TDD 实现 · 闸门一</div>
+<h3>先于测试写出来的代码，会被删掉</h3>
+<div class="gate"><p><strong>闸门一 · 不红不许实现</strong>：没有亲眼看到测试真实的失败输出（RED），不许开始写实现代码。<span class="tag p">skill</span><code>test-driven-development</code> 强制 RED → GREEN → REFACTOR 循环。</p></div>
+<p>TDD 在 AI 工作流里的价值比对人更大——它是<strong>唯一能在机器层面证明「需求已被满足」的短路验证</strong>：测试红了，证明缺的就是这个；测试绿了，证明做完了，不接受任何形式的口头声称。而且 AI 写测试极快，TDD 对人的最大成本（测试编写时间）在这里几乎不存在。</p>
+<p>测试的质量上限是形式化验证 / 穷举式验证——对核心逻辑（状态机、协议解析、金额计算）值得用 property-based testing 之类的工具逼近这个上限。</p>
+</div>
+
+<h3 class="kicker">STEP 6</h3>
+<div class="step-item">
+<div class="kicker">验收 · 闸门二</div>
+<h3>换个人来证明：写代码的不能给自己判卷</h3>
+<div class="gate"><p><strong>闸门二 · 要证据不要保证</strong>：必须是「命令 + 输出 + 退出码」，不接受「已通过」「看起来没问题」。<span class="tag p">skill</span><code>verification-before-completion</code> 禁止在出示验证输出前声称完成。</p></div>
+<p>关键是<strong>验证者与实现者分离</strong>——写代码的会话已经积累了一堆「我做完了」的惯性，让它自己验收等于让考生自己改卷。派只读验证代理：</p>
+<pre><code>@verifier 只读验证这批改动：
+1) 跑 !pytest -x，贴 命令 + 输出 + 退出码
+2) 对照 SPEC.md 验收标准逐条核对：通过 / 未通过 / 未覆盖
+3) 只读，不许改任何文件
+4) 结论明确列出：达标的、没达标的、根本没测到的</code></pre>
+<p>零配置替代品：<span class="kbd">/verify</span> 对照<strong>正在运行的应用</strong>确认改动生效；<span class="kbd">/loop 5m /verify</span> 定时巡检；<span class="kbd">/goal 条件</span> 设完成条件自动续跑到满足（<span class="kbd">/goal clear</span> 立刻停）。</p>
+<p>注意第 4 条「根本没测到的」——验收三态里最危险的是<strong>未覆盖</strong>：它意味着 SPEC 写了但没人验，下次回来看见绿灯会误以为过了。</p>
+</div>
+
+<h3 class="kicker">STEP 7</h3>
+<div class="step-item">
+<div class="kicker">审查 + 收尾</div>
+<h3>只审承重代码，把坑固化成资产</h3>
+<p>审查命令链（顺序即优先级）：</p>
+<pre><code>/diff                  ← 先看它改了什么（一切审查的入口）
+/code-review           ← 自审正确性 + 坏味道
+/security-review       ← 专项扫漏洞
+/simplify              ← 清理过度防御与重复
+/requesting-code-review ← 按清单整理信息，交付/开 PR
+/receiving-code-review  ← 有脑地回应审查意见</code></pre>
+<h3>AI 代码的三个特有坑（review 时专扫这些）</h3>
+<table>
+  <tr><th style="width:150px">坑</th><th>特征与对策</th></tr>
+  <tr><td>幻觉 API</td><td>调用不存在的方法或参数。动态语言最省事的验法是<strong>实际跑一次</strong>；静态语言靠类型检查。文档类 MCP（context7）治它</td></tr>
+  <tr><td>静默失败</td><td>空 catch、无日志 fallback——AI 特别爱写，因为它倾向让代码「看起来能跑」。review 时见 catch 必查</td></tr>
+  <tr><td>过度防御</td><td>满屏判空、永远走不到的分支。不是 bug，但污染后续改动，<code>/simplify</code> 清掉</td></tr>
+</table>
+<h3>审查精力的分配原则</h3>
+<ul>
+<li><strong>承重</strong>（核心逻辑、DB 迁移、鉴权、并发、资金）→ <strong>逐行读</strong></li>
+<li><strong>半承重</strong>（接口签名、错误处理、缓存策略）→ 扫逻辑、看边界</li>
+<li><strong>非承重</strong>（样式、日志文案、命名、注释）→ 放过</li>
+</ul>
+<p>判据一句话：「这段错了会不会炸掉核心？」一字不落逐行读不可持续，完全不读是灾难。</p>
+<h3>打扫战场</h3>
+<p><span class="tag p">skill</span><code>finishing-a-development-branch</code>：合并 / 提 PR / 保留 / 丢弃四选一。然后——<strong>这轮踩到的坑，用 <code>writing-skills</code> 固化成 skill</strong>。这是「用得浅」和「持续变强」的分水岭：坑不沉淀，就会永远用同样的方式再踩一遍。</p>
+</div>
+
+<h2 id="c5"><span class="no">5</span>解剖一份真实配置：~/.claude 里该有什么</h2>
+
+<p>前面四章是「流程」，这一章是「装备」。下面这份配置以一台实际在用的机器为参照系，并已经把教程全文引用的 skill 全部按出处补齐——照着搭一遍，流程里的每个步骤都有现成工具对应。</p>
+
+<h3>5.1 全景目录</h3>
+<pre><code>~/.claude/
+├── CLAUDE.md          ← 全局指令：语言规范 + 编码行为原则（每个会话开机即读）
+├── settings.json      ← 权限、插件开关、状态栏等运行时配置
+├── skills/            ← 方法资产（16 个）
+│   │
+│   │  ── 本机保留的两个核心 skill ──
+│   ├── grilling/         需求拷问（设计树 + 轮次制采访）
+│   ├── tdd/              测试驱动开发（即 superpowers 的 test-driven-development）
+│   │
+│   │  ── 按出处下载的 superpowers 套件（14 个）──
+│   ├── brainstorming/              需求发散与方案探索
+│   ├── writing-plans/              SPEC → 可执行计划
+│   ├── executing-plans/            按计划分批执行 + checkpoint
+│   ├── subagent-driven-development/ 计划拆给子代理，主代理只验收
+│   ├── dispatching-parallel-agents/ 并发子代理配方
+│   ├── systematic-debugging/       系统化排障（内含 root-cause-tracing.md、defense-in-depth.md）
+│   ├── verification-before-completion/ 出示证据前禁止声称完成
+│   ├── requesting-code-review/     整理审查信息，交付/开 PR
+│   ├── receiving-code-review/      有脑地回应审查意见
+│   ├── finishing-a-development-branch/ 分支收尾四选一
+│   ├── using-git-worktrees/        并行会话的物理隔离
+│   ├── writing-skills/             元 skill：怎么写 skill（内含 testing-skills-with-subagents.md）
+│   ├── using-superpowers/          superpowers 总入口/索引
+│   └── diagnosing-superpowers/     套件自身的诊断工具
+├── agents/
+│   └── debugger.md          子 Agent：系统化排障专家（只查不修时用它）
+└── plugins/
+    ├── ponytail/            编码行为接管：懒惰阶梯 YAGNI→复用→标准库→…→最小实现
+    └── claude-code-zh-cn/   中文本地化插件</code></pre>
+
+<div class="box info">
+<p><strong>读这份目录的正确方式</strong>：不是照抄文件清单，而是看它回答的三个问题——① 我的原则放在哪（CLAUDE.md）？② 我的方法固化成什么（skills/）？③ 我不想重复交代的废话谁替我接管（plugins/）？三个问题都有答案的机器，才叫「装备齐全」。</p>
+</div>
+
+<h3>5.2 CLAUDE.md：全局原则，只写不随项目变的东西</h3>
+<p>真实样例（这台机器的全局指令全文只有 22 行）：</p>
+<pre><code># 全局自定义指令
+
+## 语言
+- 始终使用简体中文回答用户。
+- 代码注释、commit 信息、文档说明默认使用中文。
+- 专有名词和报错原文可保留英文，但解释必须用中文。
+
+## 编码行为
+- 编码行为规范由 ponytail 插件接管（懒惰阶梯：YAGNI → 复用 →
+  标准库 → 原生 → 已有依赖 → 一行 → 最小实现），此处不再重复定义，
+  避免冲突。
+
+### 想清楚再写（Think Before Coding）
+- 不要替用户做隐性假设；不确定就先提问，不要猜。
+- 存在多种合理解读时，把几种解读都列出来，不要默默选一种。
+- 有更简单的方案时要说出来，必要时反驳用户的思路。
+- 自己困惑时停下来，指明哪里不清楚并请求澄清。
+
+### 目标驱动执行（Goal-Driven Execution）
+- 把命令式任务转成可验证的目标，先定"怎样算完成"，再循环直到验证通过。
+  - "修这个 bug" → 先写复现 bug 的测试，再让测试通过。
+  - "加个校验" → 先写非法输入的测试，再让测试通过。
+- 多步任务先给出简短计划：每一步标注验证方式（步骤 → verify: 检查项）。</code></pre>
+
+<p>三个可提炼的写法要点：</p>
+<ul>
+<li><strong>显式让位</strong>：「编码行为由 ponytail 接管，此处不重复定义」——全局指令最怕两处规则打架，写清归属比写全规则更重要。</li>
+<li><strong>把流程原则写死</strong>：「目标驱动执行」那一节，本质是把第 4 章的两道闸门写进了开机配置——不依赖你每次记得去说。</li>
+<li><strong>短</strong>：22 行。CLAUDE.md 每个会话都占上下文，越长稀释越狠——每一行都该值回它的 token。</li>
+</ul>
+
+<h3>5.3 skills/：从一行路由到整条流水线</h3>
+<table>
+  <tr><th style="width:170px">形态</th><th>真实例子</th><th>要点</th></tr>
+  <tr><td>完整方法论 skill</td><td><code>grilling</code>：把需求采访组织成「设计树 + 前沿轮次」——每轮把当前所有能问的问题一次性编号问完，附推荐答案，等回答再进下一轮</td><td>frontmatter 的 description 写清<strong>触发条件</strong>（"uses any 'grill' trigger phrases"），模型才知道何时该调</td></tr>
+  <tr><td>带旁文件的 skill</td><td><code>tdd</code>：SKILL.md 主线 + <code>tests.md</code>、<code>mocking.md</code> 两个专题；<code>systematic-debugging</code> 里则挂着 <code>root-cause-tracing.md</code> 与 <code>defense-in-depth.md</code></td><td>主文件长会稀释注意力，把专题拆成旁文件、在主线里用指针引用——指针<strong>措辞</strong>决定 agent 会不会真的去读</td></tr>
+  <tr><td>编排型 skill</td><td><code>subagent-driven-development</code> + <code>dispatching-parallel-agents</code>：把计划拆给子代理并行执行，主代理只验收</td><td>skill 也可以是「编排子代理的配方」——这是第 3 步探现状之外的第二个子代理用例</td></tr>
+  <tr><td>元 skill</td><td><code>writing-skills</code>：教怎么写 skill，<code>references/</code> 里还有 testing-skills-with-subagents.md（用子代理测你的 skill）</td><td>工具的工具：学完能自己造工具</td></tr>
+</table>
+
+<p>这里藏着一个全文反复出现的概念：<strong>上下文指针</strong>——skill 的 description、CLAUDE.md 里指向其他文件的那一行，都是指针。<strong>指针的措辞（而非它指向的内容）决定 agent 会不会真的去读</strong>；「重要目标藏在措辞含糊的指针后面 = 一个方差 bug，先磨措辞，磨不好再内联」。这解释了 5.2 里为什么样板文件路径胜过抽象规则，也解释了为什么 skill 建了却不触发时，先改 description 而不是改正文。</p>
+
+<h3>5.4 自己动手：新增一个 skill / agent 的最小操作</h3>
+<p>两个文件、十行字，就是一份能跑的装备：</p>
+<pre><code># ~/.claude/skills/my-skill/SKILL.md
+---
+name: my-skill
+description: 一句话说清"什么时候该用"——这是触发器，不是简介
+---
+正文写方法本身：步骤、判据、格式示例。短就是好。</code></pre>
+<pre><code># ~/.claude/agents/my-agent.md
+---
+name: my-agent
+description: 子代理的"岗位说明书"：它只做什么、不做什么
+---
+系统提示词正文：角色、约束、输出格式。</code></pre>
+<p>改完<strong>秒级热加载</strong>，新会话即生效，不用重启。两个实战提醒：</p>
+<ul>
+<li>Windows 下务必确认文件是 <strong>UTF-8 编码</strong>——PowerShell 管道重定向保存的中文 frontmatter 可能变乱码，乱码的 description 会直接导致 skill/agent 不触发。建完后开个新会话喊一下名字验证它真的在场。</li>
+<li>不知道 skill 写得合不合格？用 <code>writing-skills</code> 自查，再用它的 <code>testing-skills-with-subagents.md</code> 方法派子代理实测一遍。</li>
+</ul>
+
+<h3>5.5 出处与安装：教程引用的 skill 从哪来</h3>
+<p>本教程点名的 skill 几乎都来自同一个仓库：<code>obra/superpowers</code>（GitHub 上 stars 最高的 Claude Code skills 集合之一，MIT 许可）。三种获取方式：</p>
+<pre><code># 方式一：插件市场（推荐，装全套）
+/plugin marketplace add obra/superpowers-marketplace
+/plugin install superpowers@superpowers-marketplace
+
+# 方式二：skills.sh CLI（系统终端，不是会话内）
+npx skills add https://github.com/obra/superpowers
+
+# 方式三：只要单个 skill
+npx skills add obra/superpowers --skill brainstorming</code></pre>
+<p>装完新开会话验证：<span class="kbd">/help</span> 能看到 <code>/superpowers:*</code> 命令，或让 agent 列出可用 skill。来源对照：</p>
+<table>
+  <tr><th style="width:250px">内容</th><th>出处</th></tr>
+  <tr><td><code>grilling</code>、<code>tdd</code>（即 test-driven-development）</td><td><code>obra/superpowers-marketplace</code>（经 skills.sh 按需安装）</td></tr>
+  <tr><td>5.1 中列出的其余 14 个 skill</td><td><code>obra/superpowers</code> 仓库 <code>skills/</code> 目录</td></tr>
+  <tr><td>子代理模板（想加更多时去抄）</td><td><code>VoltAgent/awesome-claude-code-subagents</code>（100+，拷进 <code>~/.claude/agents/</code> 即用）</td></tr>
+  <tr><td>更多现成 skill 的索引</td><td><code>hesreallyhim/awesome-claude-code</code> · <code>travisvn/awesome-claude-skills</code> · <code>anthropics/skills</code>（官方）</td></tr>
+</table>
+<div class="box info">
+<p><strong>一个易踩的误解</strong>：教程里多次出现的 <code>root-cause-tracing</code>、<code>defense-in-depth</code>、<code>testing-skills-with-subagents</code> <strong>不是独立 skill</strong>，而是 <code>systematic-debugging</code> 和 <code>writing-skills</code> 目录里的旁文件——拷 skill 时要拷<strong>整个目录</strong>，只拷 SKILL.md 会把它们弄丢。另外既然本机已有同源的 <code>tdd</code>，就不要再装 <code>test-driven-development</code>：同一规则两份副本，改了一处忘了另一处，两处指令迟早打架。</p>
+</div>
+<p><strong>自建 vs 拿来</strong>：通用方法用社区的（维护成本低、经过大量实战校验），<strong>你项目特有的坑和约定才值得写成自己的 skill</strong>——那部分是任何人拿不走的资产，也是第 7 步「坑固化成 skill」的落脚点。</p>
+
+<h2 id="c6"><span class="no">6</span>翻车急救与红线</h2>
+
+<table>
+  <tr><th style="width:230px">症状</th><th>急救</th></tr>
+  <tr><td>AI 开始重复你早说过的要求 / 顺手改没让它改的 / 为错误辩解</td><td>会话卫生三信号，立刻：写 HANDOFF → <span class="kbd">/clear</span> → 新会话读 SPEC/PLAN/HANDOFF 继续</td></tr>
+  <tr><td>测试一直是绿的，但你明明还没实现</td><td>测试写废了（断言了不存在的东西恒真）。回到闸门一：验证测试本身能红</td></tr>
+  <tr><td>代码「看起来能跑」但线上静默出错</td><td>AI 坑之二静默失败。全局搜 <code>catch</code> 与空 fallback，逐个补日志/上抛</td></tr>
+  <tr><td>调用了一个查无此人的 API</td><td>幻觉 API。静态语言看类型检查，动态语言实际跑一次；接 context7 类文档 MCP 治本</td></tr>
+  <tr><td>改到一半思路错了，补丁越叠越厚</td><td><span class="kbd">Esc+Esc</span> 回滚到检查点，更新 SPEC/PLAN 写明根因，重新生成——不要原地续命</td></tr>
+  <tr><td>skill/agent 建了却不触发</td><td>多半是 frontmatter description 措辞太弱（上下文指针问题）或文件编码坏了，见 5.4</td></tr>
+</table>
+
+<div class="box bad">
+<p><strong>三条红线（不展开 git 细节，只立规矩）</strong>：① 已 push 的 commit 一律 revert 不 reset；② <code>git reset --hard</code> 前必须先 <code>git status</code>——它会丢弃所有未提交改动且不可恢复；③ 真丢了 commit，<code>git reflog</code> 能救命，只要 commit 存在过就能翻回来。</p>
+</div>
+
+<h2>结语：判断自己升级了没有</h2>
+
+<p>不需要考试，就看三个行为标志：</p>
+<ol>
+<li>拿到需求，第一反应从「怎么说提示词」变成「先判走几步、先定怎么验收」；</li>
+<li>听到 AI 说「完成了」，条件反射是「命令、输出、退出码呢」；</li>
+<li>每踩一个坑，产出物里多一个 skill 或多一行 CLAUDE.md，而不是多一声抱怨。</li>
+</ol>
+<p>三条都做到，你就已经从「用过」毕业了。</p>
+
+</div>
+</body>
+</html>

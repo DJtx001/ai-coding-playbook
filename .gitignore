@@ -1,0 +1,9 @@
+# OS / editor junk
+Thumbs.db
+desktop.ini
+.DS_Store
+*.swp
+*~
+
+# keeps the tutorial single-file (no build step, no deps)
+node_modules/

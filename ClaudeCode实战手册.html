@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 端到端实战流程手册</title>
+<style>
+  :root{
+    --ink:#2C2C2A; --ink2:#5F5E5A; --ink3:#888780;
+    --bg:#FFFFFF; --surface:#F7F6F3; --line:#E3E1DA;
+    --blue:#185FA5; --blue-bg:#E6F1FB;
+    --green:#3B6D11; --green-bg:#EAF3DE;
+    --amber:#854F0B; --amber-bg:#FAEEDA;
+    --red:#A32D2D; --red-bg:#FCEBEB;
+    --code-bg:#F5F4F0;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:48px 24px 96px;
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:15px; line-height:1.75;
+  }
+  .wrap{max-width:900px;margin:0 auto}
+  h1{font-size:28px;font-weight:500;margin:0 0 8px;letter-spacing:-0.01em}
+  .sub{color:var(--ink2);font-size:14px;margin:0 0 36px;padding-bottom:24px;border-bottom:1px solid var(--line)}
+  h2{font-size:20px;font-weight:500;margin:52px 0 16px;padding-top:24px;border-top:1px solid var(--line)}
+  h3{font-size:16px;font-weight:500;margin:28px 0 10px}
+  h4{font-size:14px;font-weight:500;margin:20px 0 8px;color:var(--ink2)}
+  h5{font-size:13px;font-weight:500;margin:16px 0 6px;color:var(--ink2)}
+  p{margin:0 0 14px}
+  ul,ol{margin:0 0 14px;padding-left:22px}
+  li{margin:4px 0}
+  code{
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+    font-size:13px; background:var(--code-bg); padding:1px 5px; border-radius:4px;
+  }
+  pre{
+    background:var(--code-bg); border:1px solid var(--line); border-radius:8px;
+    padding:14px 16px; overflow-x:auto; margin:0 0 18px;
+  }
+  pre code{background:none;padding:0;font-size:13px;line-height:1.6}
+  table{border-collapse:collapse;width:100%;margin:0 0 20px;font-size:14px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--surface);font-weight:500}
+  .box{border-radius:10px;padding:14px 18px;margin:0 0 18px;border:1px solid var(--line);background:var(--surface)}
+  .box.info{background:var(--blue-bg);border-color:#B5D4F4}
+  .box.warn{background:var(--amber-bg);border-color:#FAC775}
+  .box.good{background:var(--green-bg);border-color:#C0DD97}
+  .box.bad{background:var(--red-bg);border-color:#F7C1C1}
+  .box p:last-child{margin-bottom:0}
+  .box ul:last-child{margin-bottom:0}
+  .box ol:last-child{margin-bottom:0}
+  .tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;background:var(--surface);border:1px solid var(--line);color:var(--ink2);margin-right:6px}
+  .tag.b{background:var(--blue-bg);border-color:#B5D4F4;color:var(--blue)}
+  .tag.g{background:var(--green-bg);border-color:#C0DD97;color:var(--green)}
+  .tag.a{background:var(--amber-bg);border-color:#FAC775;color:var(--amber)}
+  .tag.r{background:var(--red-bg);border-color:#F7C1C1;color:var(--red)}
+  hr{border:none;border-top:1px solid var(--line);margin:36px 0}
+  .toc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin-bottom:36px}
+  .toc ol{margin:0;padding-left:20px;font-size:14px}
+  .toc a{color:var(--ink);text-decoration:none}
+  .toc a:hover{color:var(--blue)}
+  .chk{background:var(--green-bg);border:1px solid #C0DD97;border-radius:8px;padding:10px 16px;margin:0 0 18px;font-size:14px}
+  .chk strong{color:var(--green)}
+  .step{border-left:3px solid var(--blue);padding:4px 0 4px 18px;margin:0 0 26px}
+  .step h3{margin-top:0}
+  .gate{background:var(--red-bg);border:1px solid #F7C1C1;border-radius:8px;padding:10px 16px;margin:0 0 18px;font-size:14px}
+  .gate strong{color:var(--red)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Claude Code 端到端实战流程手册</h1>
+<p class="sub">从拿到需求到交付上线 · 每一步用什么 skill、派什么 Agent、敲哪条命令</p>
+
+<div class="toc">
+<ol>
+  <li><a href="#s0">第 0 步 · 路由：这个需求该走几步</a></li>
+  <li><a href="#s1">第 1 步 · 拷问需求（不写一行代码）</a></li>
+  <li><a href="#s2">第 2 步 · 定规格与验收清单</a></li>
+  <li><a href="#s3">第 3 步 · 派子代理探现状</a></li>
+  <li><a href="#s4">第 4 步 · 出计划并亲手改</a></li>
+  <li><a href="#s5">第 5 步 · 测试先行，再让它实现</a></li>
+  <li><a href="#s6">第 6 步 · 换个人来验证</a></li>
+  <li><a href="#s7">第 7 步 · 审查与交付</a></li>
+  <li><a href="#s8">第 8 步 · 收尾与沉淀</a></li>
+  <li><a href="#t0">附表 0 · 一图流：八步总览</a></li>
+  <li><a href="#t1">附表 A · Skill 速查表</a></li>
+  <li><a href="#t2">附表 B · 子 Agent 速查表</a></li>
+  <li><a href="#t3">附表 C · 斜杠命令速查表</a></li>
+  <li><a href="#t4">附表 D · CLI 启动参数速查表</a></li>
+  <li><a href="#t5">附表 E · 快捷键速查表</a></li>
+  <li><a href="#t6">附表 F · 你项目的真实参数</a></li>
+  <li><a href="#t7">附表 G · 翻车急救表</a></li>
+</ol>
+</div>
+
+<div class="box good">
+<p><strong>一句话心智模型</strong>：新手想的是"怎么让 AI 写出我要的代码"，高手想的是"怎么让 AI 的产出<strong>可以被验证</strong>"。<br>
+下面八步，每一条都是为了把"看起来做完了"变成"能证明做完了"。</p>
+</div>
+
+<div class="box warn">
+<p><strong>命令使用总前提（先读这个）</strong>：本手册所有命令的默认场景是——<strong>项目已经打开，Claude Code 会话已经在项目目录下启动</strong>。此后所有操作都在 Claude Code 输入框里完成，输入只有三种：<br>
+① 斜杠命令 <code>/xxx</code>（调会话内功能）；② bash 直通 <code>!命令</code>（你自己敲 shell，输出进对话，不经过 Claude 理解）；③ 自然语言 + <code>@文件</code> 引用。<br>
+全文只有三个场景需要<strong>回到系统终端</strong>：安装 / 升级 Claude Code 本身、启动一条新的并行会话（worktree）、CI 脚本调用。凡出现这三种情况，文中均已显式标注「系统终端」，其余命令一律在会话内敲。</p>
+</div>
+
+<h2 id="s0">第 0 步 · 路由：这个需求该走几步</h2>
+
+<p>先判断规模，再决定走几步。<strong>判据不是改动大小，是爆炸半径 + 你能不能快速验证。</strong></p>
+
+<table>
+  <tr><th style="width:180px">需求规模</th><th style="width:170px">走哪些步</th><th>说明</th></tr>
+  <tr><td>单行修复 / 单文件小改</td><td><span class="tag g">直接做</span>跳过 1–4</td><td>直接说 + 附验证命令。改完跑测试，绿了就 commit。<strong>错了重来比修更快</strong></td></tr>
+  <tr><td>单模块功能</td><td><span class="tag a">1 简化 + 5 + 6</span></td><td>不需要正式 SPEC，但要有验收清单</td></tr>
+  <tr><td>跨模块 / 新功能</td><td><span class="tag b">全流程 1–8</span></td><td>必须写 SPEC.md，必须过 plan mode，必须独立验证</td></tr>
+  <tr><td>从零起项目</td><td><span class="tag b">全流程 + 定原则</span></td><td>先立项目原则，再进 specify</td></tr>
+</table>
+
+<div class="box warn">
+<p><strong>唯一判据</strong>：你能不能在 <strong>30 秒</strong>内判断结果对不对？能 → 直接做；不能 → 至少走第 2 步（定验收）。<br>
+<strong>反例</strong>：改一个被 20 处引用的公共函数——哪怕只动一个文件，也不能"直接做"。</p>
+</div>
+
+<h2 id="s1">第 1 步 · 拷问需求（不写一行代码）</h2>
+
+<div class="step">
+
+<h4>目标</h4>
+<p>把模糊想法变成无歧义的表述。<strong>产出是文字，不是代码。</strong></p>
+
+<h4>用什么 skill</h4>
+<table>
+  <tr><th style="width:200px">Skill</th><th style="width:130px">来源仓库</th><th>作用</th></tr>
+  <tr>
+    <td><code>brainstorming</code></td>
+    <td><code>obra/superpowers</code></td>
+    <td>苏格拉底式设计拷问：先探清意图、约束与替代方案，再收敛到架构决策</td>
+  </tr>
+</table>
+<p><strong>superpowers</strong> 是 GitHub 上 stars 最高的 Claude Code skills 集合（约 28 万），MIT 许可，一条命令装全套，约 1.2M 次安装量。</p>
+
+<h4>怎么装</h4>
+<pre><code># 方式一：插件市场（推荐）
+/plugin marketplace add obra/superpowers-marketplace
+/plugin install superpowers@superpowers-marketplace
+
+# 方式二：skills.sh CLI（在系统终端敲，不是 Claude Code 会话里）
+npx skills add https://github.com/obra/superpowers
+
+# 只装单个 skill
+npx skills add obra/superpowers --skill brainstorming</code></pre>
+
+<h4>验证装好了没</h4>
+<pre><code>/help          # 应该能看到 /superpowers:brainstorm 等命令</code></pre>
+
+<div class="box good">
+<p><strong>它生效的标志</strong>：新开一个会话，说"我要做个功能"，它会<strong>先反问你澄清问题</strong>，而不是直接开始写代码。<br>
+如果它还是直接写代码，说明 skill 没加载——按下面"附表 H"的排查清单走。</p>
+</div>
+
+<h4>敲什么命令</h4>
+<pre><code># 会话已经开好了（启动目录就是项目根），先给会话命名，以后能按名字找回
+/rename retrieval-cache
+
+# 之后想回到这条会话，在新开的窗口里敲
+/resume retrieval-cache</code></pre>
+<p>会话还没开怎么办：在 PyCharm / IDEA 终端里 <code>cd</code> 到项目根目录，敲 <code>claude</code> 回车进入——这是全文唯一一次需要自己敲 <code>claude</code> 启动的地方，之后所有操作都在输入框里完成。</p>
+
+<h4>对话里怎么说（可直接抄）</h4>
+<pre><code>我要给检索接口加 Redis 缓存。先别写代码。
+用 brainstorming 拷问我这个需求：
+- 哪里说得不清楚？
+- 有哪些隐含假设？
+- 有哪些更简单的方案我没想到？
+把问题一次问完，我统一回答。</code></pre>
+
+<h4>顺手查细节（不污染上下文）</h4>
+<pre><code>/btw 这个仓库的检索入口在哪个文件
+/btw 现在用的 Redis 客户端是什么，key 前缀怎么定的</code></pre>
+<p><code>/btw</code> 的答案<strong>永不进入对话历史</strong>——查细节走它，别问在主线里。</p>
+
+<h4>产出（三样，缺一不可）</h4>
+<ul>
+  <li><strong>一句话需求</strong>：做成什么样，说给外人听他也懂</li>
+  <li><strong>风险清单</strong>：不确定的点、可能被忽略的边界</li>
+  <li><strong>被否掉的方案 + 理由</strong>：防止后面又绕回来</li>
+</ul>
+
+<div class="chk"><strong>检查点：</strong>你能不能用一句话说清"做完是什么样"？说不清 → 别往下走。</div>
+
+</div>
+
+<h2 id="s2">第 2 步 · 定规格与验收清单</h2>
+
+<div class="step">
+
+<h4>目标</h4>
+<p>把"要做的事"翻译成"怎么证明做完了"。<strong>核心主张：先有规格，后有代码，规格是活的文档。</strong></p>
+
+<h4>用什么 skill</h4>
+<table>
+  <tr><th style="width:200px">Skill</th><th style="width:130px">来源仓库</th><th>作用</th></tr>
+  <tr>
+    <td><code>writing-plans</code></td>
+    <td><code>obra/superpowers</code></td>
+    <td>把需求拆成有序可测的任务，每步含：改什么文件、完整代码、怎么验证</td>
+  </tr>
+  <tr>
+    <td><code>writing-skills</code></td>
+    <td><code>obra/superpowers</code></td>
+    <td>元 skill：教你按最佳实践写新 skill（要先装它，再扩展自己的）</td>
+  </tr>
+</table>
+<p>如果你的 <code>~/.claude/CLAUDE.md</code> 已经写了项目规范，它就是"项目原则"，不用另建 constitution。</p>
+
+<h4>对话里怎么说</h4>
+<pre><code>用 writing-plans 帮我写一份 SPEC.md：
+- 涉及的文件与接口签名
+- 明确不在范围内的部分
+- 端到端验证步骤（要能命令化）
+写之前先用 AskUserQuestion 问清关键决策点，直到没有歧义。</code></pre>
+
+<h4>SPEC 四要素（按重要性排序）</h4>
+<table>
+  <tr><th style="width:140px">模块</th><th style="width:280px">内容</th><th>为什么</th></tr>
+  <tr><td><strong>验收清单</strong></td><td>可勾选、<strong>可命令化</strong></td><td>没有验收项的 spec 就是散文</td></tr>
+  <tr><td><strong>边界与非目标</strong></td><td>不改 schema、不引新依赖</td><td>"不做什么"比"做什么"更防跑偏</td></tr>
+  <tr><td><strong>接口契约</strong></td><td>函数签名、字段类型、错误码</td><td>并行与集成的地基</td></tr>
+  <tr><td><strong>现有约定</strong></td><td>给 2–3 个样板文件</td><td>胜过写十条抽象规则</td></tr>
+</table>
+
+<h4>验收清单要写成这样（可执行）</h4>
+<pre><code>## 验收清单
+- [ ] `pytest -x tests/test_retrieval_cache.py` 退出码 0
+- [ ] 相同 query 连打两次，第二次向量检索埋点计数为 0
+- [ ] `python cache_hit_rate.py` 输出 >= 0.30
+- [ ] 法条更新后 5 分钟内缓存失效（手改库验证）
+- [ ] `redis-cli info memory` 占用 &lt; 300MB</code></pre>
+
+<div class="box bad">
+<p><strong>对比一下就知道差距</strong>：<br>
+✗ "缓存要生效" · "性能要提升" · "功能正常"<br>
+✓ "第二次调用不触发向量检索，埋点计数为 0" · "P95 &lt; 200ms，用 <code>mvn -q test -Dtest=OrderBenchTest</code> 验证"</p>
+</div>
+
+<h4>必须做的一步（拦掉一半跑偏）</h4>
+<pre><code>复述一遍你理解的 SPEC，尤其是"不做什么"的部分。别开始写代码。</code></pre>
+
+<div class="chk"><strong>检查点：</strong>清单里每一条都能勾选吗？有没有"什么时候算做完"的明确定义？</div>
+
+</div>
+
+<h2 id="s3">第 3 步 · 派子代理探现状</h2>
+
+<div class="step">
+
+<h4>目标</h4>
+<p>搞清楚代码现在长什么样，<strong>但别让它塞满你的上下文</strong>。子代理读一百个文件只还你一份结论。</p>
+
+<h4>用什么 Agent</h4>
+<table>
+  <tr><th style="width:230px">Agent / 方式</th><th style="width:240px">来源仓库</th><th>适用场景</th></tr>
+  <tr>
+    <td>自然语言委派</td>
+    <td>内置</td>
+    <td>一次性调研，不想建文件</td>
+  </tr>
+  <tr>
+    <td><code>--agents '{...}'</code></td>
+    <td>内置 CLI 参数</td>
+    <td>想临时限定工具或模型</td>
+  </tr>
+  <tr>
+    <td>现成子代理集合</td>
+    <td><code>VoltAgent/awesome-claude-code-subagents</code></td>
+    <td>100+ 现成定义，挑一个抄进 <code>.claude/agents/</code></td>
+  </tr>
+  <tr>
+    <td><code>dispatching-parallel-agents</code></td>
+    <td><code>obra/superpowers</code></td>
+    <td>并发子代理工作流的标准配方</td>
+  </tr>
+</table>
+<p><strong>找现成 agent 的地方</strong>：<code>VoltAgent/awesome-claude-code-subagents</code>（100+，按职能分类）。<br>
+<strong>找现成 skill 的地方</strong>：<code>hesreallyhim/awesome-claude-code</code>（21K stars，按分类）· <code>travisvn/awesome-claude-skills</code> · <code>anthropics/skills</code>（官方）。</p>
+
+<h4>敲什么命令</h4>
+<pre><code># 方式一：自然语言委派（最常用）
+让子代理读一下 retrieval 模块，说清：
+1) 现在的召回链路（BM25 + 向量 + RRF 的调用顺序）
+2) 现有的 Redis 用法（key 命名、TTL、序列化）
+3) 和这次改动可能冲突的地方
+只给结论，不要贴大段代码。
+
+# 方式二：用 /agents 建一个可复用的只读调研 agent（会话内）
+/agents
+# → Create new agent → 名字填 scout → description 写触发时机
+# → tools 只勾 Read / Grep / Glob → prompt 写：
+#   你只做只读调研，绝不修改文件。输出：调用链、关键文件行号、风险点。
+# 建好后长期复用：@scout 看一下 retrieval 的调用链
+
+# 方式三：显式点名，保证跑一次
+@"debugger (agent)" 看一下这次改动可能踩到哪些历史坑</code></pre>
+
+<div class="box info">
+<p><strong>@-mention 只保证"派给谁"</strong>——提示词内容仍由 Claude 撰写。想固定行为，就把规则写进 agent 的正文里。</p>
+</div>
+
+<div class="chk"><strong>检查点：</strong>它给的结论里有没有"我不确定"的地方？有 → 让它去补，别带进下一步。</div>
+
+</div>
+
+<h2 id="s4">第 4 步 · 出计划并亲手改</h2>
+
+<div class="step">
+
+<h4>目标</h4>
+<p>在动手前把方案想清楚。<strong>Plan 的真正价值不是给 Claude 看，是给你自己看。</strong> 大约八成的情况，计划一出来你就发现需求本身有问题，而这一步成本几乎为零。</p>
+
+<div class="box info">
+<p><strong>先搞清楚第 4 步和第 5 步的关系——这不是先后两步，是内外两层循环。</strong><br>
+第 4 步是<strong>外循环</strong>：任务 1 → 任务 2 → 任务 3，管"按什么顺序干什么、每批干到哪停"。<br>
+第 5 步是<strong>内循环</strong>：执行每个任务时，任务内部走"写失败测试 → 看到红 → 最小实现 → 看到绿 → 重构"。<br>
+writing-plans 拆计划时，每个任务本来就配着验证命令——所以不是"第 4 步把代码写完、第 5 步再补测试"，而是"第 4 步派活，每个活的干法就是第 5 步"。</p>
+</div>
+
+<h4>用什么 skill</h4>
+<table>
+  <tr><th style="width:240px">Skill</th><th style="width:130px">来源仓库</th><th>作用</th></tr>
+  <tr>
+    <td><code>writing-plans</code></td>
+    <td><code>obra/superpowers</code></td>
+    <td>把需求拆成有序可测任务，每步含文件路径 / 完整代码 / 验证方式</td>
+  </tr>
+  <tr>
+    <td><code>executing-plans</code></td>
+    <td><code>obra/superpowers</code></td>
+    <td>按计划分批执行 + 每批 checkpoint，卡住就停不硬冲</td>
+  </tr>
+  <tr>
+    <td><code>subagent-driven-development</code></td>
+    <td><code>obra/superpowers</code></td>
+    <td>计划拆给子代理执行，主代理只做验收</td>
+  </tr>
+</table>
+
+<h4>敲什么命令</h4>
+<table>
+  <tr><th style="width:270px">命令 / 键位</th><th>作用</th></tr>
+  <tr><td><code>/superpowers:writing-plans</code></td><td>直接调起写计划 skill</td></tr>
+  <tr><td><code>/superpowers:executing-plans</code></td><td>计划批准后分批执行</td></tr>
+  <tr><td><code>Shift+Tab</code></td><td>循环权限模式，直到 <code>⏸ plan mode on</code></td></tr>
+  <tr><td><code>/plan 给检索加缓存，先看现有实现</code></td><td>直接从命令行进计划模式，更快</td></tr>
+  <tr><td><code>Ctrl+G</code></td><td>把计划丢进编辑器直接改（<strong>别在对话里反复纠</strong>）</td></tr>
+  <tr><td><code>Ctrl+T</code></td><td>任务列表，<strong>跨上下文压缩存活</strong></td></tr>
+  <tr><td><code>/context</code></td><td>看上下文被谁吃掉了</td></tr>
+</table>
+
+<h4>对话里怎么说</h4>
+<pre><code>1) 让子代理读一下 src/auth，说明 session 与登录是怎么处理的
+2) 用 writing-plans 把"加 Google OAuth"拆成计划
+   → 计划出来后按 Ctrl+G 在编辑器里改（别在对话里反复纠）
+   → 按 Ctrl+T 让它拆成有验证命令的阶段
+3) 计划我认了，用 executing-plans 执行，每批结束停下等我确认
+   → 大批次想并行就切 subagent-driven-development</code></pre>
+
+<div class="chk"><strong>检查点：</strong>计划里每一条都能对应到一条可运行的验证命令吗？</div>
+
+</div>
+
+<h2 id="s5">第 5 步 · 测试先行，再让它实现</h2>
+
+<div class="step">
+
+<h4>目标</h4>
+<p>给"做完了"一个客观判据，而不是听 Claude 说做完了。Anthropic 官方实测：<strong>开箱即用的 Claude 是个糟糕的 QA agent</strong>——它会识别出合理问题，然后说服自己"这没什么大不了"并批准。</p>
+
+<div class="box info">
+<p><strong>本步是第 4 步的"内循环"，不是第 4 步干完之后的下一步。</strong><br>
+executing-plans 按 PLAN 逐个任务执行时，<strong>每个任务内部都走本步的红绿循环</strong>：先写这个任务的失败测试 → 亲眼见红 → 最小实现 → 见绿 → 重构，然后才轮到下一个任务。<br>
+计划里每个任务自带的"验证命令"，就是在这里用的。</p>
+</div>
+
+<h4>用什么 skill</h4>
+<table>
+  <tr><th style="width:240px">Skill</th><th style="width:130px">来源仓库</th><th>作用</th></tr>
+  <tr>
+    <td><code>test-driven-development</code></td>
+    <td><code>obra/superpowers</code></td>
+    <td>强制 RED → GREEN → REFACTOR。官方口径：<strong>先于测试写出来的代码会被删掉</strong></td>
+  </tr>
+  <tr>
+    <td><code>systematic-debugging</code></td>
+    <td><code>obra/superpowers</code></td>
+    <td>四阶段根因流程：复现 → 隔离 → 定位 → 验证</td>
+  </tr>
+  <tr>
+    <td><code>root-cause-tracing</code></td>
+    <td><code>obra/superpowers</code></td>
+    <td>沿调用链向上追溯，找到真正的源头而不是表象</td>
+  </tr>
+</table>
+
+<h4>敲什么命令</h4>
+<pre><code># 先让它写会失败的测试
+用 test-driven-development skill。先写会失败的测试：
+- 相同 query 两次调用，第二次不触发向量检索
+- 法条更新后缓存失效
+写完跑一遍，把红色输出贴给我。
+
+# 自己敲一遍，确认真的红（关键！）
+## Java
+!mvn -q test -Dtest=OrderIdempotentTest
+## Python
+!pytest -x tests/test_retrieval_cache.py</code></pre>
+
+<p>红了之后才让它动手：</p>
+<pre><code>测试红了。现在实现最小改动让它变绿，
+只改 retrieval.py 和 cache.py，不要重构别的地方。</code></pre>
+
+<p>绿了就提交（会话内 bash 直通，<code>!</code> 开头）：</p>
+<pre><code>!git add -p                                 # 分块暂存，剔掉无关改动
+!git commit -m "feat(retrieval): query 结果缓存"</code></pre>
+
+<div class="gate"><strong>闸门一 · 不红不许实现。</strong> 没看到真实的失败输出，就不许它开始写实现代码。</div>
+
+<h4>并行时（可选）</h4>
+<pre><code># 先让 Claude 建独立 worktree（会话内自然语言即可，别自己敲）
+用 git worktree add ../wt-feature-idempotent -b feature-idempotent
+建一个独立工作区，只建不改动，建好报告一声就行
+
+# 系统终端例外：起第二条线必须在系统终端敲（全文唯一保留的启动命令）
+cd ../wt-feature-idempotent
+claude -w feature-idempotent --tmux
+
+# 全仓机械性改动：5–30 子代理各自 worktree，各开一个 PR（会话内斜杠命令）
+/batch 给所有 Controller 加 @Valid
+
+# 后台管理（都在会话内）
+Ctrl+B                                      # 把跑着的 bash 转后台
+Ctrl+X Ctrl+K                               # 杀掉所有后台子代理
+Esc                                         # 随时打断</code></pre>
+
+</div>
+
+<h2 id="s6">第 6 步 · 换个人来验证</h2>
+
+<div class="step">
+
+<h4>目标</h4>
+<p>让<strong>没参与实现</strong>的执行者验收。这是"doer–verifier 分离"，也是官方三智能体架构（planner / generator / evaluator）的核心。</p>
+
+<h4>用什么</h4>
+<table>
+  <tr><th style="width:250px">方式</th><th style="width:130px">来源仓库</th><th>说明</th></tr>
+  <tr>
+    <td><code>verification-before-completion</code></td>
+    <td><code>obra/superpowers</code></td>
+    <td><strong>最关键的一个</strong>：禁止在跑过验证命令、出示输出之前声称"完成了"</td>
+  </tr>
+  <tr>
+    <td><code>/verify</code></td>
+    <td>内置</td>
+    <td>对照<strong>正在运行的应用</strong>确认改动生效</td>
+  </tr>
+  <tr>
+    <td><code>@"verifier (agent)"</code></td>
+    <td><code>VoltAgent/awesome-claude-code-subagents</code></td>
+    <td>现成的验证子代理定义，100+ 个可直接拷进 <code>~/.claude/agents/</code>，全新上下文、不带作者的想当然</td>
+  </tr>
+  <tr>
+    <td><code>/loop 5m /verify</code></td>
+    <td>内置</td>
+    <td>定时巡检，适合"改完等它慢慢跑"</td>
+  </tr>
+  <tr>
+    <td><code>/goal 条件</code></td>
+    <td>内置</td>
+    <td>设完成条件，跨轮自动干到满足</td>
+  </tr>
+</table>
+
+<h4>敲什么命令</h4>
+<pre><code># 内置验证
+/verify
+
+# 派独立验证子代理（推荐）
+# 定义从 GitHub 现成拷：VoltAgent/awesome-claude-code-subagents
+@"verifier (agent)" 启动服务，发 10 个真实 query，
+报告首 token 耗时、缓存命中率、内存占用，
+再跑相邻的查询流程。不要改代码，只报告。
+
+# 不想装子代理就用内置 Explore（只读、全新上下文）
+让一个只读子代理检查 retrieval/ 的改动是否生效，
+必须给出命令 + 输出 + 退出码，不要改代码。
+
+# 定时巡检
+/loop 5m /verify
+
+# 自动续跑到满足条件
+/goal pytest 退出码为 0 且输出可见，
+且没有修改 retrieval/ 以外的文件，或 15 轮后停止并总结
+
+/goal                                       # 看状态
+/goal clear                                 # 立刻停
+
+# 自己再敲一次，看真实退出码（Claude 说"通过"不算数）
+!pytest -x
+!mvn -q test</code></pre>
+
+<div class="gate"><strong>闸门二 · 要证据，不要保证。</strong> 必须是「命令 + 输出 + 退出码」，不接受"已通过""看起来没问题"。</div>
+
+<h4>卡住了怎么办</h4>
+<table>
+  <tr><th style="width:230px">症状</th><th>处置</th></tr>
+  <tr><td>测试红了修不好</td><td><code>/diagnosing-bugs</code> + <code>@"debugger (agent)"</code>，先复现取证再二分</td></tr>
+  <tr><td>环境起不来</td><td>会话内先敲 <code>/doctor</code>；还不行 → 退出会话，在系统终端 <code>claude --safe-mode</code> 重启</td></tr>
+  <tr><td>不知道它在干什么</td><td><code>Ctrl+O</code> 展开详细输出（MCP 调用默认折叠成一行）</td></tr>
+</table>
+
+</div>
+
+<h2 id="s7">第 7 步 · 审查与交付</h2>
+
+<div class="step">
+
+<h4>用什么</h4>
+<table>
+  <tr><th style="width:250px">命令 / skill</th><th style="width:130px">来源仓库</th><th>作用</th></tr>
+  <tr><td><code>requesting-code-review</code></td><td><code>obra/superpowers</code></td><td>交付前的自检清单：该带什么信息、怎么暴露设计决策</td></tr>
+  <tr><td><code>receiving-code-review</code></td><td><code>obra/superpowers</code></td><td>收到反馈后怎么回应、怎么避免无意义往返</td></tr>
+  <tr><td><code>defense-in-depth</code></td><td><code>obra/superpowers</code></td><td>多层校验：不是只加一道防线，而是层层可验证</td></tr>
+  <tr><td><code>/diff</code></td><td>内置</td><td>交互式 diff，<strong>能看每轮对话产生的改动</strong>——审查 AI 的最佳入口</td></tr>
+  <tr><td><code>/code-review</code></td><td>内置</td><td>审 diff 的正确性与清理点</td></tr>
+  <tr><td><code>/security-review</code></td><td>内置</td><td>只看安全漏洞，涉及接口必跑</td></tr>
+  <tr><td><code>/simplify</code></td><td>内置</td><td>清掉过度防御与重复代码</td></tr>
+</table>
+
+<h4>敲什么命令</h4>
+<pre><code># 1) 自己完整读一遍 diff
+/diff
+
+# 2) 双轴审查
+用 requesting-code-review 审查当前 diff：一轴看是否符合编码规范，
+一轴看是否满足 SPEC。只报影响正确性的问题，不要改代码。
+
+# 3) 安全审查（涉及鉴权 / SQL / 文件上传必跑）
+/security-review
+
+# 4) 清理过度防御
+/simplify
+
+# 5) 提交前最后确认（会话内 bash 直通）
+!git status
+!git diff --stat
+!git log --oneline -5</code></pre>
+
+<h4>只审承重代码（Thorsten Ball 原则）</h4>
+<table>
+  <tr><th style="width:130px">档位</th><th style="width:280px">范围</th><th>审查深度</th></tr>
+  <tr><td><span class="tag r">承重</span></td><td>核心逻辑、DB 迁移、鉴权、并发、资金相关</td><td><strong>逐行读</strong></td></tr>
+  <tr><td><span class="tag a">半承重</span></td><td>接口签名、错误处理、缓存策略</td><td>扫逻辑，看边界</td></tr>
+  <tr><td><span class="tag g">非承重</span></td><td>样式、日志文案、变量命名、注释</td><td><strong>放过</strong></td></tr>
+</table>
+
+<div class="box good">
+<p><strong>判据就一句</strong>：<em>"这段错了会不会炸掉核心？"</em> 会 → 逐行；不会 → 放过。<br>
+一字不落地读 AI 代码不可持续，完全不读是灾难。分档是唯一的平衡点。</p>
+</div>
+
+<h4>三个 AI 代码特有的坑</h4>
+<ul>
+  <li><strong>幻觉 API</strong>：调用了不存在的方法或参数。动态语言最省事的办法是实际执行一次</li>
+  <li><strong>静默失败</strong>：空 catch、无日志 fallback。Claude 特别爱写，因为它倾向让代码"看起来能跑"</li>
+  <li><strong>过度防御</strong>：满屏判空、永远走不到的分支。不是 bug，但污染后续改动，review 阶段清掉</li>
+</ul>
+
+<h4>交付：Git 操作（会话内 bash 直通，<code>!</code> 开头）</h4>
+<pre><code>!git status                  # 零风险，随时敲，先看清楚再动手
+!git diff                    # 看未暂存的改动
+!git diff --stat             # 快速扫一眼有没有"顺手改"
+!git add -p                  # 分块暂存
+!git commit -m "feat: xxx"   # 一个子任务一个 commit
+!git log --oneline -10
+!git reflog                  # 救命命令：只要 commit 存在过就能翻回来</code></pre>
+
+<h5>图形界面路径（IDEA / PyCharm 内置就够）</h5>
+<ul>
+  <li><code>Alt+9</code> → 打开 Version Control</li>
+  <li>已推送的撤销 → <strong>Revert Commit</strong></li>
+  <li>本地撤销 → <strong>Reset Current Branch to Here</strong>（可选 soft / mixed / hard）</li>
+</ul>
+
+<div class="box warn">
+<p><strong>两条红线</strong>：① 已 push 的 commit 一律 <code>revert</code>，不要 <code>reset</code>；② <code>git reset --hard</code> 会丢弃所有未提交改动且不可恢复，跑之前先 <code>git status</code>。</p>
+</div>
+
+<div class="chk"><strong>检查点：</strong>有一条<strong>你自己写的、不看实现</strong>的验收用例吗？Claude 写的测试常顺着实现写，必须有独立的一条兜底。</div>
+
+</div>
+
+<h2 id="s8">第 8 步 · 收尾与沉淀</h2>
+
+<div class="step">
+
+<h4>为什么单独一步</h4>
+<p><strong>每个 bug 都要变成一条永久规则。</strong> 不沉淀，同样的坑你会踩第二次。官方的做法：合并后更新 memory，把"让 agent 意外的地方"写进去。</p>
+
+<h4>用什么 skill</h4>
+<table>
+  <tr><th style="width:240px">Skill</th><th style="width:130px">来源仓库</th><th>作用</th></tr>
+  <tr>
+    <td><code>finishing-a-development-branch</code></td>
+    <td><code>obra/superpowers</code></td>
+    <td>分支收尾决策流：合并 / 提 PR / 保留 / 丢弃 + 清理 worktree</td>
+  </tr>
+  <tr>
+    <td><code>writing-skills</code></td>
+    <td><code>obra/superpowers</code></td>
+    <td>元 skill：把这次踩的坑固化成可复用 skill 的标准写法</td>
+  </tr>
+  <tr>
+    <td><code>testing-skills-with-subagents</code></td>
+    <td><code>obra/superpowers</code></td>
+    <td>用子代理验证新写的 skill 质量是否达标</td>
+  </tr>
+</table>
+
+<h4>敲什么命令</h4>
+<pre><code># 1) 让 Claude 写交接文档
+把本次的关键决策和踩过的坑写成 HANDOFF-2026-10-24.md：
+做了什么、在做什么、下一步要验证什么。别超过一段。
+
+# 2) 把新规则固化（用 writing-skills 的标准格式）
+用 writing-skills 的格式，把这次踩的坑写成一条新 skill，
+放到 ~/.claude/skills/ 下。
+
+# 3) 清空，为下一个任务腾出干净上下文
+/clear</code></pre>
+
+<div class="box info">
+<p><strong>为什么是 <code>/clear</code> 而不是 <code>/compact</code></strong>：官方发现模型有 <strong>context anxiety</strong>——
+它"以为"自己快到上下文上限就提前收尾。压缩保留了连续性，但<strong>没给它 clean slate，焦虑还在</strong>。<br>
+所以长任务用「短会话 + 结构化 handoff 文档」，不是「一个长会话反复压缩」。<br>
+（注：Opus 4.5 之后官方说这毛病基本消失，他们又改回自动压缩了——说明<strong>harness 策略会随模型过期，要定期体检</strong>。）</p>
+</div>
+
+<h4>上下文腐烂的三个可观测信号</h4>
+<ol>
+  <li><strong>开始重复你早就说过的要求</strong> — 它在反复重读，没真正记住</li>
+  <li><strong>开始"顺手改"你没让它改的地方</strong> — 失控前兆</li>
+  <li><strong>开始为错误辩解而不是修</strong> — 上下文里已堆了矛盾指令</li>
+</ol>
+<p>命中任一条 → 立刻停，写 handoff，<code>/clear</code> 重开。</p>
+
+<div class="chk"><strong>检查点：</strong>下次开会话，能不能靠这份 handoff 直接接上？</div>
+
+</div>
+
+<h2 id="t0">附表 0 · 一图流：八步总览</h2>
+
+<table>
+  <tr><th style="width:60px">步</th><th style="width:150px">这一步干什么</th><th style="width:180px">用什么</th><th style="width:230px">关键命令</th><th>过了的标志</th></tr>
+  <tr><td>0</td><td>判断走几步</td><td>路由表</td><td>—</td><td>能 30 秒内验证结果吗</td></tr>
+  <tr><td>1</td><td>拷问需求</td><td><code>brainstorming</code></td><td><code>/rename "功能名"</code> 给会话命名</td><td>一句话说清做成什么样</td></tr>
+  <tr><td>2</td><td>定规格与验收</td><td><code>writing-plans</code></td><td>让 Claude 复述 SPEC</td><td>每条验收都能勾选</td></tr>
+  <tr><td>3</td><td>探现状</td><td>子代理 + <code>dispatching-parallel-agents</code></td><td><code>让子代理读一下 [模块]</code></td><td>结论里没有"不确定"</td></tr>
+  <tr><td>4</td><td>出计划</td><td><code>writing-plans</code> · <code>executing-plans</code></td><td><code>Shift+Tab</code> · <code>Ctrl+G</code> · <code>Ctrl+T</code></td><td>每条都有验证命令</td></tr>
+  <tr><td>5</td><td>测试先行</td><td><code>test-driven-development</code></td><td><code>!pytest -x</code> · <code>!mvn -q test</code></td><td><strong>看到红色输出</strong></td></tr>
+  <tr><td>6</td><td>换人验证</td><td><code>verification-before-completion</code> + 只读子代理</td><td><code>/superpowers:verification-before-completion</code></td><td>拿到命令+输出+退出码</td></tr>
+  <tr><td>7</td><td>审查交付</td><td><code>requesting-code-review</code> · <code>/diff</code></td><td><code>/security-review</code> · <code>!git add -p</code></td><td>承重代码逐行读过</td></tr>
+  <tr><td>8</td><td>沉淀</td><td>HANDOFF + CLAUDE.md</td><td><code>/clear</code></td><td>下次能直接接上</td></tr>
+</table>
+
+<h2 id="t1">附表 A · Skill 速查表</h2>
+
+<h4>A1 · GitHub 上的顶级 skill / agent 仓库</h4>
+<table>
+  <tr><th style="width:290px">仓库</th><th style="width:90px">Stars</th><th>定位</th></tr>
+  <tr>
+    <td><code>obra/superpowers</code></td>
+    <td>约 28 万</td>
+    <td><strong>首选</strong>。完整开发方法论 skill 库，15+ 个 skill，累计约 120 万次安装。MIT</td>
+  </tr>
+  <tr>
+    <td><code>hesreallyhim/awesome-claude-code</code></td>
+    <td>2.1 万</td>
+    <td>总索引：skills / hooks / slash-commands / agents / plugins / 状态栏 / 工具</td>
+  </tr>
+  <tr>
+    <td><code>travisvn/awesome-claude-skills</code></td>
+    <td>—</td>
+    <td>另一个 skills 索引，按用途分类</td>
+  </tr>
+  <tr>
+    <td><code>anthropics/skills</code></td>
+    <td>—</td>
+    <td>官方 skills 仓（含 <code>frontend-design</code>、<code>mcp-builder</code>、<code>skill-creator</code> 等）</td>
+  </tr>
+  <tr>
+    <td><code>VoltAgent/awesome-claude-code-subagents</code></td>
+    <td>—</td>
+    <td>100+ 现成子代理定义，按职能分类</td>
+  </tr>
+  <tr>
+    <td><code>FlorianBruniaux/claude-code-ultimate-guide</code></td>
+    <td>5 千</td>
+    <td>持续更新的社区文档 + 大量现成模板</td>
+  </tr>
+  <tr>
+    <td><code>DietrichGebert/ponytail</code></td>
+    <td>—</td>
+    <td>过度工程刹车（over-engineering brake），防 AI 写多余抽象</td>
+  </tr>
+</table>
+
+<h4>A2 · superpowers 的 skill → 流程步骤对照</h4>
+<p>它之所以值得装，是因为<strong>它的 skill 划分和本手册的八步基本一一对应</strong>。</p>
+
+<table>
+  <tr><th style="width:60px">步</th><th style="width:250px">superpowers skill</th><th>干什么</th></tr>
+  <tr><td>1</td><td><code>brainstorming</code></td><td>苏格拉底式拷问：探清意图与约束，收敛到架构决策</td></tr>
+  <tr><td>2</td><td><code>writing-plans</code></td><td>把需求拆成有序可测任务，每步含文件路径、完整代码、验证方式</td></tr>
+  <tr><td>3</td><td><code>dispatching-parallel-agents</code></td><td>并发子代理工作流的标准配方</td></tr>
+  <tr><td>4</td><td><code>writing-plans</code> + <code>executing-plans</code></td><td>出计划 → 分批执行 + checkpoint</td></tr>
+  <tr><td>5</td><td><code>test-driven-development</code></td><td>强制 RED → GREEN → REFACTOR</td></tr>
+  <tr><td>5′</td><td><code>systematic-debugging</code> · <code>root-cause-tracing</code></td><td>四阶段根因 / 沿调用链上溯</td></tr>
+  <tr><td>6</td><td><code>verification-before-completion</code></td><td><strong>禁止没跑验证就声称完成</strong></td></tr>
+  <tr><td>7</td><td><code>requesting-code-review</code> · <code>receiving-code-review</code></td><td>交付前自检清单 / 回应反馈</td></tr>
+  <tr><td>7′</td><td><code>using-git-worktrees</code> · <code>subagent-driven-development</code></td><td>并行分支 / 每任务一个子代理 + 质量闸门</td></tr>
+  <tr><td>8</td><td><code>finishing-a-development-branch</code> · <code>writing-skills</code></td><td>合并 / PR / 保留 / 丢弃决策 + 沉淀成 skill</td></tr>
+</table>
+
+<div class="box warn">
+<p><strong>superpowers 的两个已知局限</strong>（README 自述）：① 在 Hermes 上缺 post-compaction hook，长会话压缩后可能丢失引导指令，需要重开会话；② 一般不收新 skill，改动必须对所有支持的 agent 通用 —— 好处是内核小，坏处是社区扩展受限。</p>
+</div>
+
+<h4>A3 · 写 SKILL.md 的最小模板</h4>
+<pre><code>---
+name: my-skill
+description: 这个 skill 做什么。Use when 什么场景下自动触发。
+---
+
+## 目的
+（一段话，说清为什么存在）
+
+## 步骤
+1. （越具体越好，模糊的步骤等于没写）
+2. ...
+
+## 例外情况
+- 遇到 X 就 ...
+
+## 输出格式
+（明确要求它输出什么结构）</code></pre>
+
+<div class="box warn">
+<p><strong>三条硬规则</strong>：① <code>description</code> 是<strong>唯一推荐必填</strong>，它决定 Claude 何时自动调用；② frontmatter 必须在<strong>文件第一行</strong>，否则整文件被当正文；③ SKILL.md 建议 <strong>500 行内</strong>，长内容拆到 <code>reference.md</code>。</p>
+</div>
+
+<h2 id="t2">附表 B · 子 Agent 速查表</h2>
+
+<table>
+  <tr><th style="width:140px">Agent</th><th style="width:70px">第几步</th><th style="width:260px">干什么</th><th>怎么调用</th></tr>
+  <tr>
+    <td><code>debugger</code><br><span class="tag a">GitHub</span></td>
+    <td>5</td>
+    <td>系统化排障：先复现取证，再二分定位根因</td>
+    <td><code>@"debugger (agent)" 排查这个报错</code></td>
+  </tr>
+  <tr>
+    <td><code>scout</code><br><span class="tag a">GitHub</span></td>
+    <td>3</td>
+    <td>只读调研代码库，返回结构化结论</td>
+    <td><code>@"scout (agent)" 读一下 X 模块</code></td>
+  </tr>
+  <tr>
+    <td><code>verifier</code><br><span class="tag a">GitHub</span></td>
+    <td>6</td>
+    <td>实跑应用验证行为，不改代码只报告</td>
+    <td><code>@"verifier (agent)" 跑一遍主流程</code></td>
+  </tr>
+  <tr>
+    <td><code>reviewer</code><br><span class="tag a">GitHub</span></td>
+    <td>7</td>
+    <td>全新上下文审 diff，只报正确性问题</td>
+    <td><code>@"reviewer (agent)" 审查当前 diff</code></td>
+  </tr>
+  <tr>
+    <td><code>Explore</code><br><span class="tag g">内置</span></td>
+    <td>3 / 6</td>
+    <td>只读子代理，上面四个的零配置替代品</td>
+    <td><code>让子代理读一下 X 模块</code></td>
+  </tr>
+</table>
+
+<h4>怎么拿到这些定义（别自己写，GitHub 上有现成的）</h4>
+<p>以下命令<strong>在系统终端敲</strong>，属于一次性环境配置，不是会话内操作：</p>
+<pre><code># 一次性把 100+ 个现成子代理定义拉到本地
+git clone https://github.com/VoltAgent/awesome-claude-code-subagents.git
+
+# 拷进全局目录（Windows）
+cp awesome-claude-code-subagents/subagents/*.md ~/.claude/agents/
+
+# 或者只拷单个
+cp awesome-claude-code-subagents/subagents/verifier.md ~/.claude/agents/
+
+# 拷完立刻生效（新定义热加载，秒级）
+# 验证：输入 @ 看列表里有没有出现</code></pre>
+
+<p>想看别人怎么写的、或者要更细分的类型（security-auditor、performance-optimizer、refactoring-specialist 等），同样在上面的仓库里翻。<strong>先抄再改</strong>，比从零写快得多，也避开了自己写 description 不准的老坑。</p>
+
+<h4>参考定义（抄来的典型结构，供你按需裁剪）</h4>
+
+<pre><code># ~/.claude/agents/scout.md
+---
+name: scout
+description: 只读调研代码库，返回结构化结论不贴大段代码。
+当需要了解某个模块现状、调用链、已有用法时使用。Use proactively.
+tools: Read, Grep, Glob
+model: sonnet
+---
+
+你只做只读调研，绝不修改任何文件。
+输出固定三段：
+1) 调用链（文件:行号）
+2) 已有的相关用法（命名 / 配置 / 序列化方式）
+3) 与本次改动可能冲突的地方
+不确定的地方明确写"未确认"，不要猜。</code></pre>
+
+<pre><code># ~/.claude/agents/verifier.md
+---
+name: verifier
+description: 实际启动应用验证改动是否真的生效。
+实现完成后、准备交付前使用。Use proactively.
+tools: Bash, Read
+---
+
+启动应用，验证本次改动的行为，以及相邻的两条流程。
+报告：你跑了什么、看到了什么、哪些行为与计划不符。
+不要修改任何代码，只报告。</code></pre>
+
+<pre><code># ~/.claude/agents/reviewer.md
+---
+name: reviewer
+description: 在全新上下文审查当前 diff，只报影响正确性的问题。
+实现完成后使用。Use proactively.
+tools: Read, Grep, Glob, Bash
+model: sonnet
+---
+
+重点检查：
+- 与 SPEC / 接口契约不符
+- 静默失败（空 catch、无日志 fallback）
+- 幻觉 API（不存在的方法或参数）
+- 边界输入与超时是否有明确行为
+
+按严重程度排序，带文件行号和修改建议。不要改代码，只报告。</code></pre>
+
+<pre><code># ~/.claude/agents/debugger.md
+---
+name: debugger
+description: 系统化排障——先复现取证，再二分定位根因，输出含报错
+原文与证据的排障报告。当出现测试失败、运行时报错、性能回退时使用。
+   Use proactively.
+tools: Read, Grep, Glob, Bash, Edit
+model: sonnet
+---
+
+你是一个排障专家。规则：
+1. **先复现**——拿到可重现的最小步骤和完整报错原文，不要猜
+2. **再二分**——用最小改动逐步缩小范围，每次只验证一个假设
+3. **输出报告**——包含根因、证据、修复建议；未定位时明确说"未确认"
+不要在没有证据的情况下下结论。</code></pre>
+
+<div class="box info">
+<p><strong>热重载</strong>：改完 <code>.md</code> 文件几秒内生效，<strong>不用重启</strong>。例外：会话启动时该目录还不存在、之后才创建首个文件的情况。</p>
+</div>
+
+<h2 id="t3">附表 C · 斜杠命令速查表</h2>
+
+<table>
+  <tr><th style="width:250px">命令</th><th style="width:70px">第几步</th><th>作用</th></tr>
+  <tr><td><code>/plan [任务]</code></td><td>4</td><td>直接进入计划模式</td></tr>
+  <tr><td><code>/diff</code></td><td>7</td><td>交互式 diff，可看每轮改动</td></tr>
+  <tr><td><code>/verify</code></td><td>6</td><td>对照运行中的应用验证</td></tr>
+  <tr><td><code>/code-review</code></td><td>7</td><td>审 diff 的正确性与清理点</td></tr>
+  <tr><td><code>/review [PR]</code></td><td>7</td><td>对 PR 快速只读审查</td></tr>
+  <tr><td><code>/security-review</code></td><td>7</td><td>只看安全漏洞</td></tr>
+  <tr><td><code>/simplify</code></td><td>7</td><td>清重复与过度防御</td></tr>
+  <tr><td><code>/goal 条件</code></td><td>6</td><td>自动续跑到满足条件；<code>/goal clear</code> 停</td></tr>
+  <tr><td><code>/loop [间隔] 命令</code></td><td>6</td><td>按间隔重复跑</td></tr>
+  <tr><td><code>/btw 问题</code></td><td>全程</td><td>侧问，答案不进对话历史</td></tr>
+  <tr><td><code>/clear</code> / <code>/compact</code></td><td>8</td><td>清空 / 压缩（换任务用 clear）</td></tr>
+  <tr><td><code>/resume [会话]</code></td><td>8</td><td>回到之前的会话</td></tr>
+  <tr><td><code>/fork [名]</code></td><td>3</td><td>从当前点分叉，试错前用</td></tr>
+  <tr><td><code>/rewind</code></td><td>卡住时</td><td>回退到检查点（=<code>Esc+Esc</code>）</td></tr>
+  <tr><td><code>/rename 名字</code></td><td>0</td><td>给会话命名</td></tr>
+  <tr><td><code>/init</code></td><td>0</td><td>扫仓库生成 CLAUDE.md 骨架</td></tr>
+  <tr><td><code>/permissions</code></td><td>0</td><td>查看 / 改权限规则</td></tr>
+  <tr><td><code>/agents</code> · <code>/skills</code> · <code>/hooks</code></td><td>0</td><td>列出 / 管理对应配置</td></tr>
+  <tr><td><code>/mcp</code></td><td>0</td><td>管理 MCP 连接与 OAuth</td></tr>
+  <tr><td><code>/add-dir 路径</code></td><td>3</td><td>多模块 / 多仓时追加可访问目录</td></tr>
+  <tr><td><code>/context</code> · <code>/cost</code> · <code>/doctor</code></td><td>全程</td><td>看上下文占用 / 花费 / 诊断</td></tr>
+  <tr><td><code>/export 文件名</code></td><td>7</td><td>导出会话留档或贴 PR</td></tr>
+  <tr><td><code>/model</code> · <code>/effort</code></td><td>全程</td><td>切模型 / 调推理强度</td></tr>
+  <tr><td><code>/batch &lt;指令&gt;</code></td><td>并行</td><td>5–30 子代理各自 worktree</td></tr>
+</table>
+
+<h2 id="t4">附表 D · CLI 启动参数速查表</h2>
+
+<div class="box warn">
+<p><strong>本表的使用场景只有一个：启动会话的那一刻</strong>（在系统终端敲 <code>claude</code> + 参数）。<br>
+会话启动后的日常操作全部在输入框里完成——见附表 C 斜杠命令、附表 E 快捷键。<strong>八步主流程里用不到本表</strong>；只有换模型起新线、CI 脚本调用、排障重启时才来查。</p>
+</div>
+
+<h4>D1 · 会话管理</h4>
+<table>
+  <tr><th style="width:300px">参数</th><th>作用</th></tr>
+  <tr><td><code>claude</code></td><td>启动交互会话，自动加载当前目录 CLAUDE.md 与 <code>.claude/</code></td></tr>
+  <tr><td><code>claude "解释这个项目"</code></td><td>带初始提示词启动</td></tr>
+  <tr><td><code>-c</code> / <code>--continue</code></td><td>继续当前目录最近一次会话</td></tr>
+  <tr><td><code>-r "auth-refactor" "继续"</code></td><td>按 ID 或名字恢复（也可传 <code>.jsonl</code> 绝对路径）</td></tr>
+  <tr><td><code>-n "feature-login"</code></td><td>给会话命名，之后可用名字恢复</td></tr>
+  <tr><td><code>--resume abc --fork-session</code></td><td>恢复但新建 session ID，原会话保留</td></tr>
+  <tr><td><code>-w feature-auth</code> / <code>--worktree</code></td><td>独立 git worktree，物理隔离</td></tr>
+  <tr><td><code>-w feature-auth --tmux</code></td><td>worktree + 独立终端面板</td></tr>
+  <tr><td><code>--bg "任务"</code></td><td>后台启动并立刻返回，打印 session ID</td></tr>
+  <tr><td><code>--from-pr 123</code></td><td>会话选择器只看关联该 PR 的</td></tr>
+  <tr><td><code>--ide</code></td><td>启动时自动连接 IDE</td></tr>
+  <tr><td><code>--session-id &lt;uuid&gt;</code></td><td>指定 session ID，给脚本对接用</td></tr>
+</table>
+
+<h4>D2 · 非交互 / 脚本（CI 用）</h4>
+<table>
+  <tr><th style="width:300px">参数</th><th>作用</th></tr>
+  <tr><td><code>-p "query"</code> / <code>--print</code></td><td>打印结果就退出，不进交互</td></tr>
+  <tr><td><code>--output-format text|json|stream-json</code></td><td>输出格式，脚本用 <code>json</code></td></tr>
+  <tr><td><code>--input-format text|stream-json</code></td><td>输入格式</td></tr>
+  <tr><td><code>--json-schema '{...}'</code></td><td>要求输出符合 JSON Schema</td></tr>
+  <tr><td><code>--max-turns 10</code></td><td>限制 agentic 轮数</td></tr>
+  <tr><td><code>--max-budget-usd 5.00</code></td><td>估算花费到上限就停（<strong>无人值守必带</strong>）</td></tr>
+  <tr><td><code>--permission-prompts none</code></td><td>无人应答时一律拒绝而非卡住</td></tr>
+  <tr><td><code>--no-session-persistence</code></td><td>不落盘，无法恢复</td></tr>
+  <tr><td><code>--bare</code></td><td>跳过 hooks/skills/agent/MCP 自动发现，脚本启动更快</td></tr>
+</table>
+
+<h4>D3 · 模型与权限</h4>
+<table>
+  <tr><th style="width:300px">参数</th><th>作用</th></tr>
+  <tr><td><code>--model sonnet|opus|haiku|&lt;完整名&gt;</code></td><td>指定模型，覆盖 settings 与环境变量</td></tr>
+  <tr><td><code>--effort low|medium|high|xhigh|max</code></td><td>推理强度，仅本会话</td></tr>
+  <tr><td><code>--fallback-model sonnet,haiku</code></td><td>主模型过载时按顺序降级</td></tr>
+  <tr><td><code>--permission-mode default|acceptEdits|plan|auto|dontAsk|bypassPermissions</code></td><td>指定起始权限模式</td></tr>
+  <tr><td><code>--allowedTools "Bash(git log *)" "Read"</code></td><td>免询问白名单</td></tr>
+  <tr><td><code>--disallowedTools "Edit" "Bash(rm *)"</code></td><td>黑名单；<code>mcp__*</code> 屏蔽所有 MCP</td></tr>
+  <tr><td><code>--tools "Bash,Edit,Read"</code></td><td>限定可用工具集（<code>""</code> 全禁）</td></tr>
+  <tr><td><code>--dangerously-skip-permissions</code></td><td>跳过所有权限提示，<strong>只在容器/一次性环境用</strong></td></tr>
+</table>
+
+<h4>D4 · 配置与调试</h4>
+<table>
+  <tr><th style="width:300px">参数</th><th>作用</th></tr>
+  <tr><td><code>--settings ./settings.json</code></td><td>用指定配置覆盖同名字段</td></tr>
+  <tr><td><code>--setting-sources user,project</code></td><td>指定加载哪些配置源</td></tr>
+  <tr><td><code>--add-dir ../lib</code></td><td>追加可读写目录</td></tr>
+  <tr><td><code>--append-system-prompt "用中文回复"</code></td><td>追加到默认系统提示末尾</td></tr>
+  <tr><td><code>--system-prompt "..."</code></td><td>整个替换系统提示（<strong>慎用</strong>，会丢工具指引）</td></tr>
+  <tr><td><code>--agent 名字</code></td><td>整个会话以该子代理身份运行</td></tr>
+  <tr><td><code>--agents '{...}'</code></td><td>用 JSON 临时定义子代理</td></tr>
+  <tr><td><code>--mcp-config ./mcp.json</code></td><td>加载 MCP 服务器</td></tr>
+  <tr><td><code>--strict-mcp-config</code></td><td>只用 <code>--mcp-config</code> 里的，忽略其它</td></tr>
+  <tr><td><code>--debug='mcp,startup'</code></td><td><strong>skill / agent 加载失败就靠它看日志</strong></td></tr>
+  <tr><td><code>--debug-file 路径</code></td><td>调试日志写文件</td></tr>
+  <tr><td><code>--safe-mode</code></td><td>禁用所有自定义配置，排障用</td></tr>
+  <tr><td><code>-v</code> / <code>--version</code></td><td>版本号</td></tr>
+</table>
+
+<h2 id="t5">附表 E · 快捷键速查表</h2>
+
+<table>
+  <tr><th style="width:210px">键位</th><th>作用</th></tr>
+  <tr><td><code>Shift+Tab</code></td><td>循环权限模式 → 切到 <code>⏸ plan mode on</code></td></tr>
+  <tr><td><code>Ctrl+G</code></td><td>把输入框内容丢进编辑器改（计划、长提示词）</td></tr>
+  <tr><td><code>Ctrl+T</code></td><td>显示 / 隐藏任务列表（<strong>跨上下文压缩存活</strong>）</td></tr>
+  <tr><td><code>Esc</code></td><td>打断它正在做的事</td></tr>
+  <tr><td><code>Esc+Esc</code></td><td>回退菜单：只恢复代码 / 只恢复对话 / 两者</td></tr>
+  <tr><td><code>Ctrl+C</code></td><td>取消当前输入或生成</td></tr>
+  <tr><td><code>Ctrl+D</code></td><td>退出会话（EOF）</td></tr>
+  <tr><td><code>Ctrl+L</code></td><td>清屏重绘，<strong>对话历史保留</strong></td></tr>
+  <tr><td><code>Ctrl+R</code></td><td>反向搜索历史输入</td></tr>
+  <tr><td><code>Ctrl+O</code></td><td>切换详细输出，看清它执行了什么（MCP 调用默认折叠）</td></tr>
+  <tr><td><code>Ctrl+B</code></td><td>把正在跑的 bash 转后台（tmux 用户按两次）</td></tr>
+  <tr><td><code>Ctrl+X Ctrl+K</code></td><td>杀掉所有后台子代理（3 秒内按两次确认）</td></tr>
+  <tr><td><code>Alt+P</code>（mac <code>Option+P</code>）</td><td>切模型，<strong>不清空已输入内容</strong></td></tr>
+  <tr><td><code>Alt+T</code> / <code>Alt+O</code></td><td>开关扩展思考 / fast mode</td></tr>
+  <tr><td><code>Alt+V</code>（Win）· <code>Ctrl+V</code></td><td>粘贴剪贴板图片</td></tr>
+  <tr><td><code>↑</code> <code>↓</code></td><td>浏览历史输入</td></tr>
+  <tr><td><code>←</code> <code>→</code></td><td>在权限对话框的标签页间切换</td></tr>
+  <tr><td><code>?</code></td><td>显示当前环境的快捷键</td></tr>
+</table>
+
+<h4>多行输入</h4>
+<table>
+  <tr><th style="width:210px">方式</th><th>适用</th></tr>
+  <tr><td><code>\</code> + <code>Enter</code></td><td><strong>所有终端通用</strong></td></tr>
+  <tr><td><code>Shift+Enter</code></td><td>iTerm2 / WezTerm / Ghostty / Kitty 直接可用</td></tr>
+  <tr><td><code>Ctrl+J</code></td><td>控制字符换行，通用兜底</td></tr>
+  <tr><td>直接粘贴</td><td>代码块、日志自动识别为多行</td></tr>
+</table>
+
+<h4>提示词前缀</h4>
+<table>
+  <tr><th style="width:210px">前缀</th><th>作用</th></tr>
+  <tr><td><code>/</code></td><td>命令 / skill。<strong>消息开头才执行</strong>；句中只是授权；不带斜杠只是提及</td></tr>
+  <tr><td><code>!</code></td><td>Bash 直通：你自己敲命令，输出进对话，<strong>不经过 Claude 理解</strong></td></tr>
+  <tr><td><code>@</code></td><td>文件路径补全，引用文件一律用它，别粘贴全文</td></tr>
+</table>
+
+<h2 id="t6">附表 F · 你项目的真实参数</h2>
+
+<p>抄命令时把占位符换成这些真值——别再写 <code>npm test</code> 了。</p>
+
+<h4>F1 · 明镜（Python / FastAPI）</h4>
+<table>
+  <tr><th style="width:240px">项</th><th>真实值</th></tr>
+  <tr><td>项目路径</td><td><code>C:/Code/Project/ai-qiuzhao/mingjing-intake</code></td></tr>
+  <tr><td>会话命名</td><td>会话内 <code>/rename 功能名</code>；之后 <code>/resume 功能名</code> 找回</td></tr>
+  <tr><td>测试命令</td><td><code>!pytest -x</code> · 单文件 <code>!pytest -x tests/test_xxx.py</code></td></tr>
+  <tr><td>向量库</td><td>Chroma，cosine + HNSW</td></tr>
+  <tr><td>嵌入模型</td><td>DashScope <code>text-embedding-v3</code>，1024 维</td></tr>
+  <tr><td>LLM</td><td><code>deepseek-chat</code>（LangChain ChatOpenAI）</td></tr>
+  <tr><td>召回参数</td><td><code>top_laws=4</code> · <code>top_cases=3</code> · <code>RRF_K=60</code></td></tr>
+  <tr><td>阈值</td><td><code>MAX_DISTANCE=0.42</code>（<strong>余弦距离口径</strong>：真相关 ≤0.39 / 无关 ≥0.57）</td></tr>
+  <tr><td>灌库批大小</td><td><code>BATCH=64</code></td></tr>
+  <tr><td>历史消息上限</td><td><code>_MAX_MESSAGES=10</code></td></tr>
+  <tr><td>BM25</td><td>jieba 分词（无法律词典），内存常驻，条件触发</td></tr>
+</table>
+
+<h4>F2 · 养老智伴 / 学途管家（Java）</h4>
+<table>
+  <tr><th style="width:240px">项</th><th>真实值</th></tr>
+  <tr><td>测试命令</td><td><code>!mvn -q test</code> · 单类 <code>!mvn -q test -Dtest=XxxTest</code></td></tr>
+  <tr><td>养老智伴</td><td>若依二开 · Java / Spring AI / RedisVectorStore / Dify / RAGFlow</td></tr>
+  <tr><td>养老智伴检索</td><td>阈值 <strong>0.7（相似度口径）</strong> · <code>topK=5</code></td></tr>
+  <tr><td>学途管家</td><td>Java 17 / Spring Boot 3.5 / MyBatis-Plus / Redis 7 / Redisson</td></tr>
+</table>
+
+<h4>F3 · 环境约束（写死在脑子里）</h4>
+<table>
+  <tr><th style="width:240px">项</th><th>值</th></tr>
+  <tr><td>服务器</td><td>阿里云 ECS <strong>2 核 4G</strong></td></tr>
+  <tr><td>已有容器</td><td>mysql:8.4 · redis:7 · app</td></tr>
+  <tr><td>API 管理</td><td>cc-switch（改的是 <code>ANTHROPIC_BASE_URL</code>，指向阿里云百炼）</td></tr>
+  <tr><td>IDE</td><td>IDEA（Java）+ PyCharm（Python），各自终端跑 Claude Code</td></tr>
+  <tr><td>skill 来源</td><td><code>obra/superpowers</code>（约 28 万星，MIT），见附表 A1</td></tr>
+  <tr><td>MCP</td><td>context7（查库的最新 API，专治幻觉 API）</td></tr>
+  <tr><td>硬约束</td><td>服务器只有 <strong>2 核 4G</strong>——任何"再起一个服务"的方案先算内存账</td></tr>
+</table>
+
+<div class="box warn">
+<p><strong>JetBrains 终端抢键</strong>：IDEA / PyCharm 终端标签页里，<code>Ctrl+R</code> 会触发替换、<code>Alt+Enter</code> 是意图操作、<code>Ctrl+B</code> 跳声明。<br>
+<strong>推荐解法</strong>：用<strong>独立 Windows Terminal</strong> 跑 Claude Code，需要看代码时再切回 IDE。比改 IDE 键位省事，也不会因为焦点变化丢输入。</p>
+</div>
+
+<h2 id="t7">附表 G · 翻车急救表</h2>
+
+<table>
+  <tr><th style="width:170px">症状</th><th style="width:240px">处置</th><th>命令 / 动作</th></tr>
+  <tr>
+    <td>越做越偏</td>
+    <td>同一句要求说到第三遍就换会话</td>
+    <td><code>/clear</code> → 用更好的初始提示词重开</td>
+  </tr>
+  <tr>
+    <td>上下文快满了</td>
+    <td><strong>重置而非压缩</strong>（context anxiety）</td>
+    <td>让它写 handoff 文档 → <code>/clear</code> → 新会话读文档接力</td>
+  </tr>
+  <tr>
+    <td>diff 读不懂</td>
+    <td><strong>回滚重做</strong>，不要继续打补丁</td>
+    <td><code>Esc+Esc</code> → 回退到上个检查点 → 先补 SPEC 再重做</td>
+  </tr>
+  <tr>
+    <td>同一个 bug 修不好</td>
+    <td>先复现取证，再二分，别猜</td>
+    <td><code>/diagnosing-bugs</code> + <code>@"debugger (agent)"</code></td>
+  </tr>
+  <tr>
+    <td>它说"通过了"但你不信</td>
+    <td>自己敲，看真实退出码</td>
+    <td><code>!pytest -x</code> · <code>!mvn -q test</code></td>
+  </tr>
+  <tr>
+    <td>环境起不来</td>
+    <td>三级排查</td>
+    <td>会话内 <code>/doctor</code>；还不行 → 退出，在系统终端 <code>claude --safe-mode</code> 重启</td>
+  </tr>
+  <tr>
+    <td>不确定当前状态</td>
+    <td>零风险命令，随时敲</td>
+    <td><code>!git status</code></td>
+  </tr>
+  <tr>
+    <td>commit 找不回来</td>
+    <td>只要存在过就能翻出来</td>
+    <td><code>!git reflog</code></td>
+  </tr>
+  <tr>
+    <td>花得太多</td>
+    <td>看花费 / 设上限</td>
+    <td><code>/cost</code> · 脚本加 <code>--max-budget-usd</code></td>
+  </tr>
+  <tr>
+    <td>并行跑串了</td>
+    <td>文件集重叠 → 必须 worktree</td>
+    <td>让 Claude 用 <code>git worktree add</code> 建独立工作区；起第二条线时在系统终端 <code>claude -w 名字</code></td>
+  </tr>
+  <tr>
+    <td>skill 没触发</td>
+    <td>description 太模糊或和别的重叠</td>
+    <td>把触发时机写具体；检查 frontmatter 在第一行</td>
+  </tr>
+</table>
+
+<hr>
+
+<div class="box info">
+<p><strong>最后一句。</strong> 这八步里，真正会被跳过的永远是<strong>第 1 步和第 2 步</strong>——因为它们看起来"没在干活"。<br>
+但所有后面返工的时间，都是从这两步省下来的时间里借的，而且利息很高。</p>
+</div>
+
+</div>
+</body>
+</html>
