@@ -31,8 +31,6 @@
 |---|---|---|
 | [**AICoding进阶教程.html**](AICoding进阶教程.html) | 主教程 · 6 章 · 3 张手绘级 SVG 流程图 | 从头系统学一遍（双击浏览器即开，零依赖） |
 | [aicoding手册.md](aicoding手册.md) | 浓缩速查表 · 一页纸主干 | 已经懂了，贴在工位上随时扫一眼 |
-| [ClaudeCode实战手册.html](ClaudeCode实战手册.html) | 八步全流程 · 8 张速查附表 | 正在用 Claude Code，查命令查快捷键 |
-| [AI编程场景下的Git生存手册.md](AI编程场景下的Git生存手册.md) | 10 个 AI 编程特有的 Git 场景 | AI 把你的仓库搞乱了，急救用 |
 | [skills/install-skills.ps1](skills/install-skills.ps1) | 一键安装 14 个方法论 skill | 想直接把流程装进你的 Claude Code |
 
 ## 一分钟了解教程主张
@@ -90,8 +88,6 @@ powershell -ExecutionPolicy Bypass -File .\skills\install-skills.ps1
 通读 AICoding进阶教程.html（约 40 分钟）
   → 用 aicoding手册.md 每天扫一遍主干（每天 2 分钟）
   → 装 skill 开始实战（一条命令）
-  → 遇到 Git 翻车查 Git生存手册
-  → 用 ClaudeCode实战手册 当日常速查
 ```
 
 ## 许可与致谢
