@@ -9,6 +9,8 @@
 ![No Dependencies](https://img.shields.io/badge/Dependencies-zero-green.svg)
 ![Skills](https://img.shields.io/badge/Skills-14%20installable-purple.svg)
 
+[**🚀 在线直接读（免下载）**](https://djtx001.github.io/ai-coding-playbook/AICoding进阶教程.html)　·　[仓库主页](https://github.com/DJtx001/ai-coding-playbook)
+
 </div>
 
 ---
@@ -52,6 +54,8 @@ cd ai-coding-playbook
 ```
 
 直接双击 `AICoding进阶教程.html`，或者先把 `aicoding手册.md` 花五分钟扫完。
+
+**懒得下载？** 直接在线读：[djtx001.github.io/ai-coding-playbook/AICoding进阶教程.html](https://djtx001.github.io/ai-coding-playbook/AICoding进阶教程.html)
 
 **想装 skill 武装到牙齿？**（Windows PowerShell）
 
