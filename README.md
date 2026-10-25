@@ -31,7 +31,7 @@
 |---|---|---|
 | [**AICoding进阶教程.html**](AICoding进阶教程.html) | 主教程 · 6 章 · 3 张手绘级 SVG 流程图 | 从头系统学一遍（双击浏览器即开，零依赖） |
 | [aicoding手册.md](aicoding手册.md) | 浓缩速查表 · 一页纸主干 | 已经懂了，贴在工位上随时扫一眼 |
-| [skills/install-skills.ps1](skills/install-skills.ps1) | 一键安装 14 个方法论 skill | 想直接把流程装进你的 Claude Code |
+| [skills/](skills/) | 14 个方法论 skill 完整副本 + 离线安装脚本 | 想直接把流程装进你的 Claude Code |
 
 ## 一分钟了解教程主张
 
@@ -55,17 +55,17 @@ cd ai-coding-playbook
 
 **懒得下载？** 直接在线读：[djtx001.github.io/ai-coding-playbook/AICoding进阶教程.html](https://djtx001.github.io/ai-coding-playbook/AICoding进阶教程.html)
 
-**想装 skill 武装到牙齿？**（Windows PowerShell）
+**想装 skill 武装到牙齿？**（Windows PowerShell，完全离线）
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\skills\install-skills.ps1
 ```
 
-脚本会从 skill 原作者仓库拉取最新版，安装 14 个流程 skill 到 `~/.claude/skills/`，装完新开会话验证即可。
+脚本会把 [skills/](skills/) 目录下的 14 个流程 skill 复制到 `~/.claude/skills/`，装完新开会话验证即可。
 
 ## 教程引用了哪些 skill
 
-本教程第 4 章主干流程直接点名的方法，全部来自开源社区，**本仓库只提供安装脚本与出处，不打包任何第三方代码**：
+本教程第 4 章主干流程直接点名的方法，全部来自开源社区，**完整副本已收录在 [skills/](skills/) 目录**（保留原作者版权声明与 MIT 许可，见 [skills/LICENSE-superpowers](skills/LICENSE-superpowers)）：
 
 | Skill | 出处 |
 |---|---|
@@ -92,8 +92,8 @@ powershell -ExecutionPolicy Bypass -File .\skills\install-skills.ps1
 
 ## 许可与致谢
 
-- 本仓库原创内容（教程、手册、README）采用 [MIT License](LICENSE) 发布
-- `obra/superpowers` 及其 marketplaces 的 skill 版权归原作者所有（MIT），由安装脚本从原仓库实时拉取
+- 本仓库原创内容（教程、手册、README、安装脚本）采用 [MIT License](LICENSE) 发布
+- [skills/](skills/) 内的 14 个 skill 来自 [obra/superpowers](https://github.com/obra/superpowers)，版权归 Jesse Vincent 所有，按 MIT 许可随本仓库分发（Copyright (c) 2025 Jesse Vincent，许可全文见 [skills/LICENSE-superpowers](skills/LICENSE-superpowers)），快照版本 `2ce8aa15d05b`
 - 方法论大量参考了社区实践与 Claude Code 官方文档
 
 ---
