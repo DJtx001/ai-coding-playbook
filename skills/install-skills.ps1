@@ -1,5 +1,6 @@
-# Install the 14 bundled methodology skills into ~/.claude/skills
-# Skills are vendored from obra/superpowers (MIT, Copyright (c) 2025 Jesse Vincent).
+# Install the 15 bundled methodology skills into ~/.claude/skills
+# Skills are vendored from obra/superpowers and obra/superpowers-marketplace
+# (MIT, Copyright (c) 2025 Jesse Vincent).
 # See LICENSE-superpowers and README.md in this folder.
 # Usage (Windows PowerShell):
 #   powershell -ExecutionPolicy Bypass -File .\install-skills.ps1
@@ -12,7 +13,7 @@ Write-Host "[1/2] installing to $dst ..."
 New-Item -ItemType Directory $dst -Force | Out-Null
 
 # Remove skills this repo no longer recommends (only if they exist)
-foreach ($s in @("grill-me", "code-review", "diagnosing-bugs", "writing-for-agents")) {
+foreach ($s in @("grill-me", "code-review", "diagnosing-bugs", "writing-for-agents", "using-superpowers")) {
   $p = Join-Path $dst $s
   if (Test-Path $p) { Remove-Item $p -Recurse -Force; Write-Host "  [removed]   $s" }
 }
@@ -26,12 +27,7 @@ Get-ChildItem $src -Directory | ForEach-Object {
   $count++
 }
 
-Write-Host "[2/2] checking TDD prerequisite ..."
-if (-not (Test-Path (Join-Path $dst "tdd"))) {
-  Write-Host "  [note] 'tdd' not found. This repo bundles no TDD skill on purpose"
-  Write-Host "         (avoid duplicate TDD rules). Install test-driven-development"
-  Write-Host "         from github.com/obra/superpowers if you need it."
-}
+Write-Host "[2/2] done. Open a NEW Claude Code session and verify with: ls ~/.claude/skills"
 
 Write-Host ""
 Write-Host "[OK] installed $count skills. Open a NEW Claude Code session and verify."

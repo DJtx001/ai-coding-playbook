@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>从「能用」到「用好」· AI Coding 进阶教程</title>
+<title>Claude Code 实战手册 · 从「能用」到「用好」</title>
 <style>
   :root{
     --ink:#2C2C2A; --ink2:#5F5E5A; --ink3:#888780;
@@ -57,6 +57,7 @@
   .toc ol{margin:0;padding-left:20px;font-size:14px}
   .toc a{color:var(--ink);text-decoration:none}
   .toc a:hover{color:var(--blue)}
+  .toc .part{font-size:12px;letter-spacing:.08em;color:var(--ink3);text-transform:uppercase;margin:10px 0 6px}
   figure{margin:0 0 22px;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
   figure svg{display:block;width:100%;height:auto}
   figure svg text{paint-order:stroke;stroke:#F7F6F3;stroke-width:4px;stroke-linejoin:round}
@@ -72,139 +73,63 @@
   .steps{counter-reset:st}
   .step-item{border-left:3px solid var(--blue);padding:2px 0 2px 18px;margin:0 0 22px}
   .step-item h3{margin:0 0 8px}
+  .step-item.sub{border-left-color:var(--purple)}
   .kicker{font-size:12px;letter-spacing:.08em;color:var(--ink3);text-transform:uppercase;margin-bottom:4px}
   .gate{background:var(--red-bg);border:1px solid #F7C1C1;border-radius:8px;padding:10px 16px;margin:0 0 14px;font-size:14px}
   .gate strong{color:var(--red)}
   .kbd{font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 6px;background:var(--surface);font-family:Consolas,monospace}
+  .phase{display:inline-block;font-size:12px;padding:2px 10px;border-radius:12px;background:var(--blue-bg);border:1px solid #B5D4F4;color:var(--blue);margin-bottom:8px;font-weight:600}
   @media (max-width:640px){.vs{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<h1>从「能用」到「用好」</h1>
-<p class="sub">AI Coding 进阶教程 · 把「一句话让它写代码」升级为「一套可验证的工程流程」</p>
-<span class="aud">适合你：已经在用 AI 编码工具，但产出总要靠运气的人</span>
-
-<div class="box bad">
-<p><strong>你是否中招？</strong>以下任意一条命中，说明你还停在「用过」阶段：</p>
-<ul>
-<li>开一个新需求，第一句话永远是「帮我实现 XXX」</li>
-<li>AI 说「已完成」你就信了，运行才发现根本跑不通</li>
-<li>对话越拉越长，AI 开始遗忘早先的约束、顺手改你没让它改的文件</li>
-<li>生成质量全靠运气：好起来惊为天人，差起来一无是处，且你不知道差别在哪</li>
-<li>复盘时说不清「这次它为什么会写错」</li>
-</ul>
-</div>
+<h1>Claude Code 实战手册</h1>
+<p class="sub">从「能用」到「用好」· 一套可验证的工程流程 + 一份从零可复现的配置</p>
+<span class="aud">适合你：已经在用 Claude Code / Cursor 等 AI 编码工具，但产出总要靠运气的人</span>
 
 <div class="box good">
-<p><strong>一句话心智模型（本教程全文围绕它）</strong>：新手想的是「怎么让 AI 写出我要的代码」，高手想的是「怎么让 AI 的产出<strong>可以被验证</strong>」。每一步操作，都是把「看起来做完了」变成「能证明做完了」。</p>
+<p><strong>心智模型（全文围绕它）</strong>：不是「怎么让 AI 写出我要的代码」，是「怎么让 AI 的产出<strong>可以被验证</strong>」。每一步操作，都是在把「看起来做完了」变成「能证明做完了」。</p>
+</div>
+
+<div class="box info">
+<p><strong>本手册分两部分，解决两个不同的问题</strong>：</p>
+<ul>
+<li><strong>Part I · 日常怎么干</strong>——路由、八步主流程、报错处理、上下文卫生、红线、速查表。解决「每一次任务怎么把它做对」。</li>
+<li><strong>Part II · 机器怎么装</strong>——从零配置的 12 个阶段：模型接入、hooks 闸门、15 个 skill、2 个子代理、插件、模板。解决「让机器替你把规矩守住」。</li>
+</ul>
+<p>两部分互相咬合：Part I 里的每个动作，在 Part II 都有对应的 skill、agent 或 hook 兜底；Part II 装的每一件装备，都在 Part I 的流程里有明确的使用时机。</p>
 </div>
 
 <div class="toc">
 <strong>目录</strong>
+<div class="part">Part I · 日常怎么干</div>
 <ol>
-  <li><a href="#c1">第 1 章 · 心智模型升级：从生成到验证</a></li>
-  <li><a href="#c2">第 2 章 · 会话卫生：上下文是易腐资产</a></li>
-  <li><a href="#c3">第 3 章 · 路由：拿到需求先判走几步</a></li>
-  <li><a href="#c4">第 4 章 · 主干流程七步走</a>（拷问 → 规格 → 探现状 → 计划 → TDD → 验收 → 审查收尾）</li>
-  <li><a href="#c5">第 5 章 · 解剖一份真实配置：~/.claude 里该有什么</a></li>
-  <li><a href="#c6">第 6 章 · 翻车急救与红线</a></li>
+  <li><a href="#c1">路由：30 秒判走几步</a></li>
+  <li><a href="#c2">主流程：八步，先看谁来做</a></li>
+  <li><a href="#c3">报错怎么处理</a></li>
+  <li><a href="#c4">上下文卫生：易腐资产怎么管</a></li>
+  <li><a href="#c5">红线</a></li>
+  <li><a href="#c6">速查：这个场景用谁</a></li>
+</ol>
+<div class="part">Part II · 机器怎么装</div>
+<ol start="7">
+  <li><a href="#c7">从零配置清单：12 个阶段</a></li>
+  <li><a href="#c8">文件地图与维护约定</a></li>
 </ol>
 </div>
 
-<h2 id="c1"><span class="no">1</span>心智模型升级：从生成到验证</h2>
+<h2 id="c1"><span class="no">1</span>路由：30 秒判走几步</h2>
 
-<p>「用过但用得浅」的核心症状不是不会写提示词，而是<strong>整个工作流里没有验证环节</strong>。对比两种工作流：</p>
+<p>多数人翻车的根源：对所有需求用同一档力度——大需求轻率直做，小需求过度流程。<strong>判据不是改动大小，是爆炸半径 + 能不能在 30 秒内验证。</strong></p>
 
-<div class="vs">
-  <div class="card bad-c">
-    <h4>✗ 生成式工作流（大多数人的现状）</h4>
-    <ul>
-      <li>提需求 → AI 输出代码 → 看起来对就贴上</li>
-      <li>报错 → 把错误整段丢回去 → AI 补丁叠补丁</li>
-      <li>跑不起来 → 「再试一次」 → 上下文越陷越深</li>
-      <li>质量标准：AI 自己的声称（「已完成」「没问题」）</li>
-    </ul>
-  </div>
-  <div class="card good-c">
-    <h4>✓ 验证式工作流（本教程教的）</h4>
-    <ul>
-      <li>提需求前先<strong>拷问</strong>：边界、替代方案、不做什么</li>
-      <li>动手前先定<strong>验收清单</strong>：每条 = 一条命令 + 一个退出码</li>
-      <li>实现走 <strong>TDD</strong>：测试必须先红，亲眼见红才许写实现</li>
-      <li>完成前<strong>换个人验证</strong>：子代理只读核对，出示命令+输出</li>
-      <li>质量标准：证据，不接受任何口头保证</li>
-    </ul>
-  </div>
-</div>
-
-<p>这个转变不需要你学新工具，只需要在每个环节<strong>插入一个「证明」动作</strong>。后面各章给出的全是可操作的插入点。</p>
-
-<h2 id="c2"><span class="no">2</span>会话卫生：上下文是易腐资产</h2>
-
-<p>模型的工作记忆就是这段对话的全部。它不是硬盘，更像<strong> RAM——会腐烂</strong>。腐烂有三个可观测信号：</p>
-
-<figure>
-<svg viewBox="0 0 860 300" xmlns="http://www.w3.org/2000/svg" font-family="PingFang SC,Microsoft YaHei,sans-serif">
-  <text x="430" y="24" text-anchor="middle" font-size="14" fill="#2C2C2A" font-weight="600">上下文健康度随对话长度衰减</text>
-  <line x1="60" y1="250" x2="800" y2="250" stroke="#888780" stroke-width="1.5"/>
-  <text x="800" y="270" text-anchor="end" font-size="11" fill="#888780">对话长度 →</text>
-  <line x1="60" y1="250" x2="60" y2="50" stroke="#888780" stroke-width="1.5"/>
-  <text x="40" y="150" font-size="11" fill="#888780" transform="rotate(-90 46 150)">产出质量</text>
-  <path d="M60,70 C 250,72 380,80 470,120 C 560,160 660,210 780,238" stroke="#A32D2D" stroke-width="2.5" fill="none" stroke-dasharray="6 4"/>
-  <line x1="500" y1="50" x2="500" y2="250" stroke="#3B6D11" stroke-width="1.5" stroke-dasharray="4 4"/>
-  <circle cx="330" cy="95" r="5" fill="#854F0B"/>
-  <path d="M330,95 L275,50" stroke="#854F0B" stroke-width="1" fill="none"/>
-  <text x="270" y="46" text-anchor="end" font-size="11" fill="#854F0B">信号一：开始重复你说过的要求</text>
-  <circle cx="620" cy="176" r="5" fill="#854F0B"/>
-  <path d="M620,176 L672,141" stroke="#854F0B" stroke-width="1" fill="none"/>
-  <text x="680" y="138" font-size="11" fill="#854F0B">信号二：顺手改你没让它改的地方</text>
-  <circle cx="716" cy="214" r="5" fill="#854F0B"/>
-  <path d="M716,214 L672,231" stroke="#854F0B" stroke-width="1" fill="none"/>
-  <text x="664" y="236" text-anchor="end" font-size="11" fill="#854F0B">信号三：为错误辩解而不是修</text>
-  <rect x="512" y="52" width="280" height="52" rx="8" fill="#EAF3DE" stroke="#C0DD97"/>
-  <text x="652" y="72" text-anchor="middle" font-size="12" fill="#3B6D11" font-weight="600">命中任一条 → 立刻停</text>
-  <text x="652" y="92" text-anchor="middle" font-size="12" fill="#3B6D11">写 HANDOFF.md → /clear 重开</text>
-</svg>
-<figcaption>三个信号都是「腐烂」而不是「能力不足」——继续硬聊只会更差，重启才是省钱解</figcaption>
-</figure>
-
-<h3>为什么是 /clear 而不是 /compact</h3>
-<p>压缩（compact）保留了连续性，但没有给模型一块干净的白板——模型「以为」自己快到上限就会提前收尾、降低质量（context anxiety）。<strong>长任务 = 短会话 + 结构化交接，而不是一个长会话反复压缩。</strong></p>
-
-<h3>HANDOFF.md 交接模板</h3>
-<p>停会话之前把「它其实没记住、新会话需要知道的东西」写下来，越像工单越好：</p>
-<pre><code># HANDOFF.md
-## 当前任务
-（一句话说在做什么）
-## 已完成
-- 步骤 1-3，产物：SPEC.md / 测试文件路径
-## 卡在哪
-- 第 4 步 X 原因，已排除 Y、Z 两种假设
-## 下一步
-- 从第 N 步继续，先读 SPEC.md 和 PLAN.md
-## 已知坑（勿再踩）
-- 例：api/client.ts 的 timeout 单位是秒不是毫秒</code></pre>
-
-<p>新会话第一句固定为：<code>读 SPEC.md、PLAN.md 和 HANDOFF.md，从第 N 步继续</code>。</p>
-
-<h3>日常会话微操</h3>
 <table>
-  <tr><th style="width:180px">动作</th><th>用途</th></tr>
-  <tr><td><span class="kbd">/rename 会话名</span></td><td>给会话命名，方便日后切回来</td></tr>
-  <tr><td><span class="kbd">/resume 会话名</span></td><td>切换到别的对话，开新支线</td></tr>
-  <tr><td><span class="kbd">/btw</span></td><td>顺手一问不污染主线上下文（问完即弃）</td></tr>
-  <tr><td><span class="kbd">/clear</span></td><td>清空重来——配合 HANDOFF 使用，是常规操作不是失败标志</td></tr>
+  <tr><th style="width:170px">情况</th><th style="width:170px">走法</th><th>做什么</th></tr>
+  <tr><td>改完能 30 秒验证</td><td><span class="tag g">直接做</span></td><td>不写 SPEC。改完跑测试，绿了就 commit——<strong>错了重来比修更快</strong></td></tr>
+  <tr><td>单模块</td><td><span class="tag a">轻量档</span></td><td>拷打 + TDD + 验收：<code>/brainstorming</code> → <code>tdd</code> → <code>@verifier</code>。不写正式 SPEC，但要有验收清单</td></tr>
+  <tr><td>跨模块 / 新功能</td><td><span class="tag b">全流程</span></td><td>第 1–8 步一步不省</td></tr>
 </table>
-
-<div class="box info">
-<p><strong>进阶隔离 · git worktree</strong>：要同时开两条互不干扰的任务线（比如一边重构一边修 bug），用 worktree 给每个会话一个<strong>物理隔离的工作目录</strong>，并发的子代理文件集再怎么重叠也撞不了车。</p>
-</div>
-
-<h2 id="c3"><span class="no">3</span>路由：拿到需求先判走几步</h2>
-
-<p>多数人翻车的另一根源：对所有需求用同一档力度——大需求轻率直做，小需求过度流程。<strong>判据不是改动大小，而是爆炸半径 + 你能不能在 30 秒内验证结果。</strong></p>
 
 <figure>
 <svg viewBox="0 0 860 330" xmlns="http://www.w3.org/2000/svg" font-family="PingFang SC,Microsoft YaHei,sans-serif">
@@ -232,302 +157,574 @@
   <text x="430" y="212" text-anchor="middle" font-size="12.5" fill="#854F0B" font-weight="600">轻量档：拷问+验收两步</text>
   <text x="430" y="232" text-anchor="middle" font-size="11" fill="#854F0B">单模块 → 不写正式 SPEC，但要有验收清单</text>
   <rect x="560" y="190" width="240" height="56" rx="10" fill="#E6F1FB" stroke="#B5D4F4"/>
-  <text x="680" y="212" text-anchor="middle" font-size="12.5" fill="#185FA5" font-weight="600">全流程档：七步全走</text>
-  <text x="680" y="232" text-anchor="middle" font-size="11" fill="#185FA5">跨模块/新功能 → 必写 SPEC，必过 plan mode</text>
+  <text x="680" y="212" text-anchor="middle" font-size="12.5" fill="#185FA5" font-weight="600">全流程档：八步全走</text>
+  <text x="680" y="232" text-anchor="middle" font-size="11" fill="#185FA5">跨模块/新功能 → 必写 SPEC，必过 plan</text>
   <rect x="150" y="276" width="560" height="40" rx="8" fill="#FCEBEB" stroke="#F7C1C1"/>
-  <text x="430" y="301" text-anchor="middle" font-size="12" fill="#A32D2D">反例：改一个被 20 处引用的公共函数——哪怕只动一个文件，也不能「直接做」</text>
+  <text x="430" y="301" text-anchor="middle" font-size="12" fill="#A32D2D">反例：改一个被 20 处引用的公共函数——只动一个文件也不能「直接做」</text>
 </svg>
-<figcaption>路由三问决定力度档位：验证速度是唯一硬判据</figcaption>
+<figcaption>爆炸半径由调用方数量决定，不由 diff 行数决定</figcaption>
 </figure>
 
-<div class="box warn">
-<p><strong>「直接做」的安全网</strong>：即便是最低档，也要遵守——改完立刻跑测试，绿了才 commit；测试不红反绿（本来就该过的用例挂了）说明改坏了，直接回滚重来。这一档快的前提是<strong>舍得扔</strong>。</p>
+<h2 id="c2"><span class="no">2</span>主流程：八步，先看谁来做</h2>
+
+<p>全流程档的八步。<strong>每一步先解决「谁来干」——主 Agent 还是子 Agent</strong>，再看怎么干。</p>
+
+<table>
+  <tr><th style="width:30px">步</th><th style="width:150px">做什么</th><th style="width:130px">执行者</th><th>为什么是它</th></tr>
+  <tr><td>1</td><td>拷打需求</td><td><strong>主</strong></td><td>要跟你来回问，子代理接不到你的回答</td></tr>
+  <tr><td>2</td><td>写 SPEC</td><td><strong>主</strong></td><td>要你确认，且它是后面六步的锚</td></tr>
+  <tr><td>3</td><td>探现状</td><td><strong>子</strong>（Explore）</td><td>只读、输出是结论，原文不必进主窗口</td></tr>
+  <tr><td>4</td><td>拆 PLAN</td><td><strong>主</strong></td><td>拆法取决于你的偏好，要你审</td></tr>
+  <tr><td>5</td><td>执行</td><td><strong>主</strong>（默认）/ <strong>子</strong>（并行时）</td><td>单线改动连着上下文；任务独立才拆出去</td></tr>
+  <tr><td>6</td><td>验收</td><td><strong>子</strong>（verifier）+ <strong>Hook</strong></td><td>实现者不能给自己判分；闸门是机器</td></tr>
+  <tr><td>7</td><td>Review</td><td><strong>主</strong></td><td>要判断哪段承重，子代理不知道你的项目</td></tr>
+  <tr><td>8</td><td>打扫战场</td><td><strong>主</strong></td><td>git 决策 + 你来拍板</td></tr>
+</table>
+
+<div class="box dark">
+<p><strong>分派原则一句话</strong>：输入能一句话说清、输出是结论、不需要跟你来回 → <strong>子 Agent</strong>；需要判断、需要你拍板、前后要连着改 → <strong>主 Agent</strong>。</p>
+<p><strong>代价要认</strong>：子 Agent 有自己的上下文，不占主窗口，但它<strong>看不到你刚才说过的话</strong>，也读不到你脑子里的背景。派它时任务书必须自包含——说清范围、说清只读、说清要交回什么。</p>
+<p><strong>别让它空手回来</strong>：要证据就明说「贴命令 + 输出 + 退出码」，否则它只回一句「没问题」，你还得自己再跑一遍。</p>
 </div>
-
-<h2 id="c4"><span class="no">4</span>主干流程七步走</h2>
-
-<p>下面进入全流程档的七步。先看一图流，再逐步展开。每一步都有一个共同主题：<strong>在声称之前，先要证据。</strong></p>
 
 <figure>
-<svg viewBox="0 0 880 210" xmlns="http://www.w3.org/2000/svg" font-family="PingFang SC,Microsoft YaHei,sans-serif">
+<svg viewBox="0 0 880 330" xmlns="http://www.w3.org/2000/svg" font-family="PingFang SC,Microsoft YaHei,sans-serif">
   <g font-size="12" text-anchor="middle">
-    <rect x="14"  y="52" width="104" height="56" rx="10" fill="#E6F1FB" stroke="#B5D4F4"/><text x="66" y="76" fill="#185FA5" font-weight="600">1 拷问需求</text><text x="66" y="94" font-size="10.5" fill="#5F5E5A">不写一行代码</text>
-    <rect x="136" y="52" width="104" height="56" rx="10" fill="#E6F1FB" stroke="#B5D4F4"/><text x="188" y="76" fill="#185FA5" font-weight="600">2 写 SPEC</text><text x="188" y="94" font-size="10.5" fill="#5F5E5A">验收清单第一</text>
-    <rect x="258" y="52" width="104" height="56" rx="10" fill="#EDE9FA" stroke="#C9BEEF"/><text x="310" y="76" fill="#5B4A9E" font-weight="600">3 子代理探现状</text><text x="310" y="94" font-size="10.5" fill="#5F5E5A">只读不改</text>
-    <rect x="380" y="52" width="104" height="56" rx="10" fill="#E6F1FB" stroke="#B5D4F4"/><text x="432" y="76" fill="#185FA5" font-weight="600">4 出计划</text><text x="432" y="94" font-size="10.5" fill="#5F5E5A">Ctrl+G 亲手改</text>
-    <rect x="502" y="52" width="104" height="56" rx="10" fill="#FAEEDA" stroke="#FAC775"/><text x="554" y="76" fill="#854F0B" font-weight="600">5 TDD 实现</text><text x="554" y="94" font-size="10.5" fill="#5F5E5A">不红不许写</text>
-    <rect x="624" y="52" width="104" height="56" rx="10" fill="#EAF3DE" stroke="#C0DD97"/><text x="676" y="76" fill="#3B6D11" font-weight="600">6 独立验收</text><text x="676" y="94" font-size="10.5" fill="#5F5E5A">换人来证明</text>
-    <rect x="746" y="52" width="118" height="56" rx="10" fill="#EAF3DE" stroke="#C0DD97"/><text x="805" y="76" fill="#3B6D11" font-weight="600">7 审查+收尾</text><text x="805" y="94" font-size="10.5" fill="#5F5E5A">坑固化成 skill</text>
+    <rect x="20"  y="64" width="180" height="56" rx="10" fill="#E6F1FB" stroke="#B5D4F4"/><text x="110" y="88" fill="#185FA5" font-weight="600">1 拷打需求</text><text x="110" y="106" font-size="10.5" fill="#5F5E5A">主 · 不写一行代码</text>
+    <rect x="240" y="64" width="180" height="56" rx="10" fill="#E6F1FB" stroke="#B5D4F4"/><text x="330" y="88" fill="#185FA5" font-weight="600">2 写 SPEC</text><text x="330" y="106" font-size="10.5" fill="#5F5E5A">主 · 验收清单第一</text>
+    <rect x="460" y="64" width="180" height="56" rx="10" fill="#EDE9FA" stroke="#C9BEEF"/><text x="550" y="88" fill="#5B4A9E" font-weight="600">3 子代理探现状</text><text x="550" y="106" font-size="10.5" fill="#5F5E5A">子 · 只读不改</text>
+    <rect x="680" y="64" width="180" height="56" rx="10" fill="#E6F1FB" stroke="#B5D4F4"/><text x="770" y="88" fill="#185FA5" font-weight="600">4 拆 PLAN</text><text x="770" y="106" font-size="10.5" fill="#5F5E5A">主 · Ctrl+G 亲手改</text>
+    <rect x="680" y="196" width="180" height="56" rx="10" fill="#FAEEDA" stroke="#FAC775"/><text x="770" y="220" fill="#854F0B" font-weight="600">5 执行</text><text x="770" y="238" font-size="10.5" fill="#5F5E5A">主默认 / 并行交子</text>
+    <rect x="460" y="196" width="180" height="56" rx="10" fill="#EAF3DE" stroke="#C0DD97"/><text x="550" y="220" fill="#3B6D11" font-weight="600">6 验收</text><text x="550" y="238" font-size="10.5" fill="#5F5E5A">子 verifier + Hook</text>
+    <rect x="240" y="196" width="180" height="56" rx="10" fill="#E6F1FB" stroke="#B5D4F4"/><text x="330" y="220" fill="#185FA5" font-weight="600">7 Review</text><text x="330" y="238" font-size="10.5" fill="#5F5E5A">主 · 只审承重代码</text>
+    <rect x="20"  y="196" width="180" height="56" rx="10" fill="#EAF3DE" stroke="#C0DD97"/><text x="110" y="220" fill="#3B6D11" font-weight="600">8 打扫战场</text><text x="110" y="238" font-size="10.5" fill="#5F5E5A">主 · 坑固化成 skill</text>
   </g>
   <g stroke="#888780" stroke-width="1.5" fill="none">
-    <path d="M118,80 H132"/><path d="M240,80 H254"/><path d="M362,80 H376"/><path d="M484,80 H498"/><path d="M606,80 H620"/><path d="M728,80 H742"/>
+    <path d="M200,92 H236"/><path d="M420,92 H456"/><path d="M640,92 H676"/>
+    <path d="M770,120 V192"/>
   </g>
-  <path d="M805,112 C 805,160 66,160 66,112" stroke="#3B6D11" stroke-width="1.5" stroke-dasharray="5 4" fill="none"/>
-  <text x="430" y="168" text-anchor="middle" font-size="11.5" fill="#3B6D11">任何一步上下文腐烂 → 写 HANDOFF → /clear → 「读 SPEC/PLAN/HANDOFF，从第 N 步继续」</text>
-  <rect x="122" y="26" width="120" height="22" rx="11" fill="#FCEBEB" stroke="#F7C1C1"/>
-  <text x="182" y="41" text-anchor="middle" font-size="10.5" fill="#A32D2D">闸门一 · 不红不许实现</text>
-  <rect x="612" y="26" width="128" height="22" rx="11" fill="#FCEBEB" stroke="#F7C1C1"/>
-  <text x="676" y="41" text-anchor="middle" font-size="10.5" fill="#A32D2D">闸门二 · 要证据不要保证</text>
+  <path d="M680,224 H644" stroke="#888780" stroke-width="1.5" fill="none"/>
+  <path d="M460,224 H424" stroke="#888780" stroke-width="1.5" fill="none"/>
+  <path d="M240,224 H204" stroke="#888780" stroke-width="1.5" fill="none"/>
+  <path d="M110,196 C 110,150 550,150 550,120" stroke="#3B6D11" stroke-width="1.5" stroke-dasharray="5 4" fill="none"/>
+  <text x="330" y="152" text-anchor="middle" font-size="11.5" fill="#3B6D11">任何一步上下文腐烂 → 写 HANDOFF → /clear → 「读 SPEC/PLAN/HANDOFF，从第 N 步继续」</text>
+  <rect x="600" y="20" width="150" height="22" rx="11" fill="#FCEBEB" stroke="#F7C1C1"/>
+  <text x="675" y="35" text-anchor="middle" font-size="10.5" fill="#A32D2D">闸门一 · 不红不许实现</text>
+  <rect x="380" y="270" width="170" height="22" rx="11" fill="#FCEBEB" stroke="#F7C1C1"/>
+  <text x="465" y="285" text-anchor="middle" font-size="10.5" fill="#A32D2D">闸门二 · 要证据不要保证</text>
 </svg>
-<figcaption>七步主干 + 两道硬闸门：所有步骤都在为「可验证」服务</figcaption>
+<figcaption>八步主干 + 两道硬闸门：蓝=主，紫=子代理，所有步骤都在为「可验证」服务</figcaption>
 </figure>
 
-<h3 class="kicker">STEP 1</h3>
 <div class="step-item">
-<div class="kicker">拷打需求 · 不写一行代码</div>
-<h3>先当甲方，再当甲方</h3>
-<p>需求到手直接开写，是「浅用」的最典型形态——AI 会替你默默做一堆隐性假设，等代码出来你才发现双方理解根本不一致。正确动作是让 AI 先<strong>采访你</strong>：</p>
-<ul>
-<li><span class="tag p">skill</span><code>brainstorming</code>：发散，探清意图、约束和替代方案</li>
-<li><span class="tag p">skill</span><code>grilling</code>：收敛，像设计评审一样逐轮逼问，直到架构决策全部落定</li>
-</ul>
-<p>拷问的产物是一份「想清楚了」的共识——它直接决定第 2 步 SPEC 里「非目标」章节能写得多具体。<strong>这一步省一分钟，第 5 步还一小时。</strong></p>
+<div class="kicker">STEP 1 · 主 Agent</div>
+<h3>拷打需求：先当甲方，再当甲方</h3>
+<pre><code>/brainstorming      ← 需求还模糊，先澄清要做什么、为什么做
+/grilling           ← 方案已经想好了，捶它：漏洞、反例、更简单的替代</code></pre>
+<p>产出不是文档，是<strong>一句话目标 + 明确的「不做什么」</strong>。后者比前者防跑偏。</p>
 </div>
 
-<h3 class="kicker">STEP 2</h3>
 <div class="step-item">
-<div class="kicker">写 SPEC.md · 规格说明书</div>
-<h3>验收清单是 spec 的第一要素</h3>
-<p>判断一份 spec 是不是散文，只看一点：<strong>每条验收项能不能翻译成「一条命令 + 一个退出码/可见输出」。</strong>不能，就是没写完。按重要性排序的五节：</p>
+<div class="kicker">STEP 2 · 主 Agent</div>
+<h3>写 SPEC：验收清单是唯一的第一要素</h3>
+<pre><code>/writing-plans      + 模板 config/templates/SPEC.md.template</code></pre>
 <table>
-  <tr><th style="width:150px">章节</th><th>写法要点</th></tr>
-  <tr><td>① 验收清单</td><td>可勾选、可命令化。<code>! pytest tests/x.py</code> → 退出码 0 才算过</td></tr>
-  <tr><td>② 边界与非目标</td><td>「不做什么」比「做什么」更防跑偏（例：不改 schema、不引新依赖）</td></tr>
-  <tr><td>③ 接口契约</td><td>函数签名、字段类型、错误码——并行与集成的地基</td></tr>
-  <tr><td>④ 现有约定</td><td>给 2-3 个样板文件路径，胜过十条抽象规则</td></tr>
-  <tr><td>⑤ 背景与目标</td><td>1-2 行，给人也给 agent 看</td></tr>
+  <tr><th style="width:140px">序</th><th style="width:150px">内容</th><th>判据</th></tr>
+  <tr><td>1</td><td><strong>验收清单</strong></td><td>每条 = 一条命令 + 一个退出码/可见输出。不能命令化的验收项等于没写</td></tr>
+  <tr><td>2</td><td><strong>边界与非目标</strong></td><td>「不改 schema、不引新依赖」这类硬边界</td></tr>
+  <tr><td>3</td><td>接口契约</td><td>函数签名、字段类型、错误码</td></tr>
+  <tr><td>4</td><td>现有约定</td><td>给 2–3 个样板文件，胜过十条抽象规则</td></tr>
+  <tr><td>5</td><td>背景与目标</td><td>1–2 行，给人也给 agent 看</td></tr>
 </table>
-<div class="box info">
-<p><strong>为什么样板文件胜过抽象规则？</strong>抽象规则（「遵循项目风格」）每次解读都可能不同；具体文件路径是零歧义的锚点，agent 会自己去读并模仿。这也是后文「上下文指针」思想的第一次应用。</p>
-</div>
+<div class="box info"><p><strong>没有验收项的 SPEC 就是散文。</strong></p></div>
 </div>
 
-<h3 class="kicker">STEP 3</h3>
-<div class="step-item">
-<div class="kicker">派子 Agent 探现状 · 只读</div>
-<h3>读代码这件事，别用主会话</h3>
-<p>「这个改动会牵扯到哪些地方」需要读十几个文件——把这些全文读进主会话，上下文当场烂一半。派子代理去读，<strong>只回传结论</strong>：</p>
-<pre><code>调查 X 模块的现状：哪些文件引用了它、现有测试覆盖到哪、
-改动会波及哪些接口。只读，不改任何文件，返回结论清单。</code></pre>
-<p>多个独立调查可以同时派（<span class="tag p">skill</span><code>dispatching-parallel-agents</code>）；注意：子代理们的工作文件集若有重叠，必须配 worktree 物理隔离，否则互相覆盖。</p>
+<div class="step-item sub">
+<div class="kicker">STEP 3 · 子 Agent（Explore）</div>
+<h3>探现状：别在主对话里翻十个文件</h3>
+<pre><code>派 Explore 子代理：找出这条链路的现状——入口在哪、数据怎么流、
+谁在调用这个函数（列全）、现有测试覆盖了什么。只读，只回结论。</code></pre>
+<p>子代理要交回的答案就是五件事：<strong>请求从哪进、数据怎么流、数据库在哪读写、模型和工具在哪调用、报错查哪里</strong>。</p>
+<p>这一步的产物直接决定第 4 步怎么拆——<strong>没摸清现状就拆计划，等于画图纸不看地基。</strong></p>
 </div>
 
-<h3 class="kicker">STEP 4</h3>
 <div class="step-item">
-<div class="kicker">出计划 · plan mode</div>
-<h3>八成问题在图纸阶段暴露，成本为零</h3>
+<div class="kicker">STEP 4 · 主 Agent</div>
+<h3>拆 PLAN：八成问题在图纸阶段暴露，成本为零</h3>
+<pre><code>/writing-plans      + 模板 config/templates/PLAN.md.template</code></pre>
 <ul>
-<li><span class="tag p">skill</span><code>writing-plans</code> 把 SPEC 拆成 PLAN：每一步标明哪些走 TDD、哪些直接写</li>
-<li>进入 plan mode：<span class="kbd">Shift+Tab</span> 循环权限模式直到 <code>⏸ plan mode on</code>，或 <span class="kbd">/plan 任务</span> 直达</li>
-<li>计划出来后 <span class="kbd">Ctrl+G</span> 丢进编辑器<strong>亲手改</strong>——这是全流程性价比最高的一分钟</li>
-<li>执行用 <span class="tag p">skill</span><code>executing-plans</code>：分批 checkpoint，每批停下验收；<span class="kbd">Ctrl+T</span> 看任务进度（跨上下文压缩存活）</li>
-<li>大批次想并行：换成 <span class="tag p">skill</span><code>subagent-driven-development</code>——计划拆给子代理执行，主代理只做验收</li>
+<li>每一步标注<strong>验证方式</strong>（步骤 → verify: 检查项）</li>
+<li>标清楚哪几步走 <code>tdd</code>、哪几步直接写</li>
+<li><strong>审计划</strong>：<span class="kbd">Ctrl+G</span> 把计划丢进编辑器亲手改</li>
 </ul>
-<p><strong>执行期报错分流</strong>（决定继续还是推倒，判据是「修复会不会动结构」）：</p>
+</div>
+
+<div class="step-item">
+<div class="kicker">STEP 5 · 主 Agent 默认</div>
+<h3>执行：两道闸门必须过</h3>
 <table>
-  <tr><th style="width:250px">情况</th><th>动作</th></tr>
-  <tr><td>代码报错，原因不明</td><td><span class="tag p">skill</span><code>systematic-debugging</code> 查 bug；找不到为啥坏用 <code>root-cause-tracing</code>（只查不修）</td></tr>
-  <tr><td>定位了，一行能治（参数/条件/typo）</td><td>最小修复 + 回归测试验证</td></tr>
-  <tr><td>定位了，但要动结构 / 思路本身错了</td><td><span class="kbd">Esc+Esc</span> 回滚 → 更新 SPEC/PLAN（把根因和防再犯写进去）→ 重新生成</td></tr>
-  <tr><td>上下文脏了</td><td><span class="kbd">/clear</span> 重开，第一句「读 SPEC.md、PLAN.md、HANDOFF.md，从第 N 步继续」</td></tr>
+  <tr><th style="width:280px">场景</th><th>用什么</th></tr>
+  <tr><td>默认，自己按计划做</td><td><code>/executing-plans</code>（主）</td></tr>
+  <tr><td>任务彼此独立，想并行</td><td><code>/subagent-driven-development</code> 或 <code>/dispatching-parallel-agents</code>（子代理写，主只验收）</td></tr>
+  <tr><td>写功能 / 修 bug，测试先于实现</td><td><code>tdd</code>（自动触发，不用喊）</td></tr>
 </table>
+<div class="gate"><p><strong>闸门一 · 不红不许实现</strong>：没亲眼看到真实的失败输出，不许开始写实现。</p></div>
+<div class="gate"><p><strong>闸门二 · 要证据不要保证</strong>：只认「命令 + 输出 + 退出码」，不接受「已通过」「看起来没问题」。</p></div>
+<div class="box warn">
+<p><strong>拆出去的前提：文件集不重叠。</strong>两个子代理改同一个文件，冲突得你自己收场——真需要并行又绕不开，先开 worktree 物理隔离。</p>
+<p><strong>节奏</strong>：分批 checkpoint，每批做完停下验收，不要一口气跑到底。</p>
+<p><strong>同一处改两次仍失败 → 不许再改，回滚重新生成。</strong>第三次之后的尝试基本都是错的，继续只是在给错误加论证。</p>
+</div>
 </div>
 
-<h3 class="kicker">STEP 5</h3>
-<div class="step-item">
-<div class="kicker">TDD 实现 · 闸门一</div>
-<h3>先于测试写出来的代码，会被删掉</h3>
-<div class="gate"><p><strong>闸门一 · 不红不许实现</strong>：没有亲眼看到测试真实的失败输出（RED），不许开始写实现代码。<span class="tag p">skill</span><code>test-driven-development</code> 强制 RED → GREEN → REFACTOR 循环。</p></div>
-<p>TDD 在 AI 工作流里的价值比对人更大——它是<strong>唯一能在机器层面证明「需求已被满足」的短路验证</strong>：测试红了，证明缺的就是这个；测试绿了，证明做完了，不接受任何形式的口头声称。而且 AI 写测试极快，TDD 对人的最大成本（测试编写时间）在这里几乎不存在。</p>
-<p>测试的质量上限是形式化验证 / 穷举式验证——对核心逻辑（状态机、协议解析、金额计算）值得用 property-based testing 之类的工具逼近这个上限。</p>
-</div>
-
-<h3 class="kicker">STEP 6</h3>
-<div class="step-item">
-<div class="kicker">验收 · 闸门二</div>
-<h3>换个人来证明：写代码的不能给自己判卷</h3>
-<div class="gate"><p><strong>闸门二 · 要证据不要保证</strong>：必须是「命令 + 输出 + 退出码」，不接受「已通过」「看起来没问题」。<span class="tag p">skill</span><code>verification-before-completion</code> 禁止在出示验证输出前声称完成。</p></div>
-<p>关键是<strong>验证者与实现者分离</strong>——写代码的会话已经积累了一堆「我做完了」的惯性，让它自己验收等于让考生自己改卷。派只读验证代理：</p>
+<div class="step-item sub">
+<div class="kicker">STEP 6 · 子 Agent + Hook</div>
+<h3>验收：写代码的不能给自己判卷</h3>
+<p><strong>自动的那一半</strong>：Stop 闸门已经替你做了——工作区有改动时自动跑项目测试，失败就阻止收工并把最后 30 行错误回传。你什么都不用做。</p>
+<p><strong>手动的那一半</strong>：需要对照 SPEC 逐条判定时，派独立验收者。</p>
 <pre><code>@verifier 只读验证这批改动：
-1) 跑 !pytest -x，贴 命令 + 输出 + 退出码
+1) 跑 &lt;验收命令&gt;，贴 命令 + 输出 + 退出码
 2) 对照 SPEC.md 验收标准逐条核对：通过 / 未通过 / 未覆盖
 3) 只读，不许改任何文件
 4) 结论明确列出：达标的、没达标的、根本没测到的</code></pre>
-<p>零配置替代品：<span class="kbd">/verify</span> 对照<strong>正在运行的应用</strong>确认改动生效；<span class="kbd">/loop 5m /verify</span> 定时巡检；<span class="kbd">/goal 条件</span> 设完成条件自动续跑到满足（<span class="kbd">/goal clear</span> 立刻停）。</p>
-<p>注意第 4 条「根本没测到的」——验收三态里最危险的是<strong>未覆盖</strong>：它意味着 SPEC 写了但没人验，下次回来看见绿灯会误以为过了。</p>
+<div class="box info"><p><strong>为什么验收必须是子 Agent</strong>：谁写的谁判分，永远判自己及格。这是全套流程里唯一一条不能省的分工。验收只返回是否有问题——PASS 一行结论，FAIL 必须带命令 + 输出 + 退出码。</p></div>
+<h3>闸门要能跑，项目得先有测试命令</h3>
+<table>
+  <tr><th style="width:250px">项目布局</th><th style="width:150px">闸门认不认</th><th>怎么办</th></tr>
+  <tr><td>有 <code>tests/</code> 且装了 pytest</td><td><strong>认，自动</strong></td><td>不用配</td></tr>
+  <tr><td><code>package.json</code> 里有 <code>test</code></td><td><strong>认，自动</strong></td><td>不用配</td></tr>
+  <tr><td>测试是手跑脚本、没装 pytest</td><td><strong>不认，静默放行</strong></td><td>见下</td></tr>
+</table>
+<div class="box bad"><p><strong>不认就等于没装。</strong>闸门找不到命令，按设计直接放行——你以为有保护，其实裸奔。</p></div>
+<pre><code>pip install pytest
+mkdir tests            # 目录必须先存在
+# 把现有 smoke 脚本里的 test_* 函数搬进 tests/
+# 加一个 pytest.ini：testpaths = tests</code></pre>
+<p>只有非标准布局才手写 <code>.claude/verify.json</code>：</p>
+<pre><code>{ "command": ".venv/Scripts/python.exe scripts/check.py", "timeout": 180 }</code></pre>
+<div class="box warn"><p><strong>别把 e2e 脚本填进去。</strong>那种要先把服务起起来的，每轮跑一次拖几十秒，你几天后必然把它关掉——闸门一关，等于回到没装的状态。</p></div>
 </div>
 
-<h3 class="kicker">STEP 7</h3>
 <div class="step-item">
-<div class="kicker">审查 + 收尾</div>
-<h3>只审承重代码，把坑固化成资产</h3>
-<p>审查命令链（顺序即优先级）：</p>
-<pre><code>/diff                  ← 先看它改了什么（一切审查的入口）
-/code-review           ← 自审正确性 + 坏味道
-/security-review       ← 专项扫漏洞
-/simplify              ← 清理过度防御与重复
-/requesting-code-review ← 按清单整理信息，交付/开 PR
-/receiving-code-review  ← 有脑地回应审查意见</code></pre>
-<h3>AI 代码的三个特有坑（review 时专扫这些）</h3>
+<div class="kicker">STEP 7 · 主 Agent</div>
+<h3>Review：只审承重代码</h3>
+<pre><code>/diff               ← 一切审查的入口，先看它到底改了什么
+/code-review        ← 正确性 + 坏味道（当前 diff 或 PR）
+/simplify           ← 清理过度防御、重复、多余抽象
+/security-review    ← 专项扫漏洞</code></pre>
 <table>
-  <tr><th style="width:150px">坑</th><th>特征与对策</th></tr>
-  <tr><td>幻觉 API</td><td>调用不存在的方法或参数。动态语言最省事的验法是<strong>实际跑一次</strong>；静态语言靠类型检查。文档类 MCP（context7）治它</td></tr>
-  <tr><td>静默失败</td><td>空 catch、无日志 fallback——AI 特别爱写，因为它倾向让代码「看起来能跑」。review 时见 catch 必查</td></tr>
-  <tr><td>过度防御</td><td>满屏判空、永远走不到的分支。不是 bug，但污染后续改动，<code>/simplify</code> 清掉</td></tr>
+  <tr><th style="width:230px">类型</th><th>读法</th></tr>
+  <tr><td>承重（核心逻辑、DB 迁移、鉴权、并发、资金）</td><td><strong>逐行读</strong></td></tr>
+  <tr><td>半承重（接口签名、错误处理、缓存策略）</td><td>扫逻辑，看边界</td></tr>
+  <tr><td>非承重（样式、日志文案、变量命名）</td><td><strong>放过</strong></td></tr>
 </table>
-<h3>审查精力的分配原则</h3>
-<ul>
-<li><strong>承重</strong>（核心逻辑、DB 迁移、鉴权、并发、资金）→ <strong>逐行读</strong></li>
-<li><strong>半承重</strong>（接口签名、错误处理、缓存策略）→ 扫逻辑、看边界</li>
-<li><strong>非承重</strong>（样式、日志文案、命名、注释）→ 放过</li>
-</ul>
-<p>判据一句话：「这段错了会不会炸掉核心？」一字不落逐行读不可持续，完全不读是灾难。</p>
-<h3>打扫战场</h3>
-<p><span class="tag p">skill</span><code>finishing-a-development-branch</code>：合并 / 提 PR / 保留 / 丢弃四选一。然后——<strong>这轮踩到的坑，用 <code>writing-skills</code> 固化成 skill</strong>。这是「用得浅」和「持续变强」的分水岭：坑不沉淀，就会永远用同样的方式再踩一遍。</p>
+<p>判据一句话：「这段错了会不会炸掉核心？」一字不落读不可持续，完全不读是灾难。</p>
+<table>
+  <tr><th style="width:150px">AI 代码三个特有坑</th><th>特征与对策</th></tr>
+  <tr><td>幻觉 API</td><td>调不存在的方法。动态语言最省事的验法是实际跑一次，文档类用 context7 查</td></tr>
+  <tr><td>静默失败</td><td>空 catch、无日志 fallback。AI 特别爱写，因为它倾向让代码「看起来能跑」</td></tr>
+  <tr><td>过度防御</td><td>满屏判空、永远走不到的分支。不是 bug，但污染后续改动</td></tr>
+</table>
 </div>
 
-<h2 id="c5"><span class="no">5</span>解剖一份真实配置：~/.claude 里该有什么</h2>
-
-<p>前面四章是「流程」，这一章是「装备」。下面这份配置以一台实际在用的机器为参照系，并已经把教程全文引用的 skill 全部按出处补齐——照着搭一遍，流程里的每个步骤都有现成工具对应。</p>
-
-<h3>5.1 全景目录</h3>
-<pre><code>~/.claude/
-├── CLAUDE.md          ← 全局指令：语言规范 + 编码行为原则（每个会话开机即读）
-├── settings.json      ← 权限、插件开关、状态栏等运行时配置
-├── skills/            ← 方法资产（16 个）
-│   │
-│   │  ── 本机保留的两个核心 skill ──
-│   ├── grilling/         需求拷问（设计树 + 轮次制采访）
-│   ├── tdd/              测试驱动开发（即 superpowers 的 test-driven-development）
-│   │
-│   │  ── 按出处下载的 superpowers 套件（14 个）──
-│   ├── brainstorming/              需求发散与方案探索
-│   ├── writing-plans/              SPEC → 可执行计划
-│   ├── executing-plans/            按计划分批执行 + checkpoint
-│   ├── subagent-driven-development/ 计划拆给子代理，主代理只验收
-│   ├── dispatching-parallel-agents/ 并发子代理配方
-│   ├── systematic-debugging/       系统化排障（内含 root-cause-tracing.md、defense-in-depth.md）
-│   ├── verification-before-completion/ 出示证据前禁止声称完成
-│   ├── requesting-code-review/     整理审查信息，交付/开 PR
-│   ├── receiving-code-review/      有脑地回应审查意见
-│   ├── finishing-a-development-branch/ 分支收尾四选一
-│   ├── using-git-worktrees/        并行会话的物理隔离
-│   ├── writing-skills/             元 skill：怎么写 skill（内含 testing-skills-with-subagents.md）
-│   ├── using-superpowers/          superpowers 总入口/索引
-│   └── diagnosing-superpowers/     套件自身的诊断工具
-├── agents/
-│   └── debugger.md          子 Agent：系统化排障专家（只查不修时用它）
-└── plugins/
-    ├── ponytail/            编码行为接管：懒惰阶梯 YAGNI→复用→标准库→…→最小实现
-    └── claude-code-zh-cn/   中文本地化插件</code></pre>
-
-<div class="box info">
-<p><strong>读这份目录的正确方式</strong>：不是照抄文件清单，而是看它回答的三个问题——① 我的原则放在哪（CLAUDE.md）？② 我的方法固化成什么（skills/）？③ 我不想重复交代的废话谁替我接管（plugins/）？三个问题都有答案的机器，才叫「装备齐全」。</p>
+<div class="step-item">
+<div class="kicker">STEP 8 · 主 Agent</div>
+<h3>打扫战场：坑固化成资产</h3>
+<pre><code>/finishing-a-development-branch     ← 合并 / 提 PR / 保留 / 丢弃，四选一</code></pre>
+<p>踩到的坑，用 <code>/writing-skills</code> 固化成 skill，下次自动避开。<strong>这一步不做，前面八步白走一遍</strong>——同样的坑会再踩。</p>
 </div>
 
-<h3>5.2 CLAUDE.md：全局原则，只写不随项目变的东西</h3>
-<p>真实样例（这台机器的全局指令全文只有 22 行）：</p>
-<pre><code># 全局自定义指令
+<h2 id="c3"><span class="no">3</span>报错怎么处理</h2>
 
-## 语言
-- 始终使用简体中文回答用户。
-- 代码注释、commit 信息、文档说明默认使用中文。
-- 专有名词和报错原文可保留英文，但解释必须用中文。
+<p>分岔点只有一个：<strong>定位到了没有。</strong></p>
 
-## 编码行为
-- 编码行为规范由 ponytail 插件接管（懒惰阶梯：YAGNI → 复用 →
-  标准库 → 原生 → 已有依赖 → 一行 → 最小实现），此处不再重复定义，
-  避免冲突。
-
-### 想清楚再写（Think Before Coding）
-- 不要替用户做隐性假设；不确定就先提问，不要猜。
-- 存在多种合理解读时，把几种解读都列出来，不要默默选一种。
-- 有更简单的方案时要说出来，必要时反驳用户的思路。
-- 自己困惑时停下来，指明哪里不清楚并请求澄清。
-
-### 目标驱动执行（Goal-Driven Execution）
-- 把命令式任务转成可验证的目标，先定"怎样算完成"，再循环直到验证通过。
-  - "修这个 bug" → 先写复现 bug 的测试，再让测试通过。
-  - "加个校验" → 先写非法输入的测试，再让测试通过。
-- 多步任务先给出简短计划：每一步标注验证方式（步骤 → verify: 检查项）。</code></pre>
-
-<p>三个可提炼的写法要点：</p>
-<ul>
-<li><strong>显式让位</strong>：「编码行为由 ponytail 接管，此处不重复定义」——全局指令最怕两处规则打架，写清归属比写全规则更重要。</li>
-<li><strong>把流程原则写死</strong>：「目标驱动执行」那一节，本质是把第 4 章的两道闸门写进了开机配置——不依赖你每次记得去说。</li>
-<li><strong>短</strong>：22 行。CLAUDE.md 每个会话都占上下文，越长稀释越狠——每一行都该值回它的 token。</li>
-</ul>
-
-<h3>5.3 skills/：从一行路由到整条流水线</h3>
 <table>
-  <tr><th style="width:170px">形态</th><th>真实例子</th><th>要点</th></tr>
-  <tr><td>完整方法论 skill</td><td><code>grilling</code>：把需求采访组织成「设计树 + 前沿轮次」——每轮把当前所有能问的问题一次性编号问完，附推荐答案，等回答再进下一轮</td><td>frontmatter 的 description 写清<strong>触发条件</strong>（"uses any 'grill' trigger phrases"），模型才知道何时该调</td></tr>
-  <tr><td>带旁文件的 skill</td><td><code>tdd</code>：SKILL.md 主线 + <code>tests.md</code>、<code>mocking.md</code> 两个专题；<code>systematic-debugging</code> 里则挂着 <code>root-cause-tracing.md</code> 与 <code>defense-in-depth.md</code></td><td>主文件长会稀释注意力，把专题拆成旁文件、在主线里用指针引用——指针<strong>措辞</strong>决定 agent 会不会真的去读</td></tr>
-  <tr><td>编排型 skill</td><td><code>subagent-driven-development</code> + <code>dispatching-parallel-agents</code>：把计划拆给子代理并行执行，主代理只验收</td><td>skill 也可以是「编排子代理的配方」——这是第 3 步探现状之外的第二个子代理用例</td></tr>
-  <tr><td>元 skill</td><td><code>writing-skills</code>：教怎么写 skill，<code>references/</code> 里还有 testing-skills-with-subagents.md（用子代理测你的 skill）</td><td>工具的工具：学完能自己造工具</td></tr>
+  <tr><th style="width:230px">状态</th><th>动作</th><th style="width:150px">谁来做</th></tr>
+  <tr><td>刚开始报错</td><td><code>systematic-debugging</code> 自动接手，或派 <code>@debugger</code>（独立上下文更省）</td><td>子或主</td></tr>
+  <tr><td>坏了但找不到为啥坏</td><td>读 <code>systematic-debugging</code> 里的 <code>root-cause-tracing.md</code>（只查不修）</td><td>子（只读，只交结论）</td></tr>
+  <tr><td>定位了，一行能治（参数、条件、typo）</td><td>最小修复 + 回归测试验证</td><td>主</td></tr>
+  <tr><td>定位了，但要动结构 / 思路本身错了</td><td><span class="kbd">Esc Esc</span> 回滚 → 更新 SPEC/PLAN（把根因和防再犯写进去）→ 重新生成</td><td>主</td></tr>
+  <tr><td>上下文脏了</td><td>写 HANDOFF → <code>/clear</code> → 从第 N 步继续</td><td>主</td></tr>
+  <tr><td>同一个错试了三次还没好</td><td><strong>换会话</strong>。第三次之后的尝试基本都是错的</td><td>主（换会话）</td></tr>
 </table>
 
-<p>这里藏着一个全文反复出现的概念：<strong>上下文指针</strong>——skill 的 description、CLAUDE.md 里指向其他文件的那一行，都是指针。<strong>指针的措辞（而非它指向的内容）决定 agent 会不会真的去读</strong>；「重要目标藏在措辞含糊的指针后面 = 一个方差 bug，先磨措辞，磨不好再内联」。这解释了 5.2 里为什么样板文件路径胜过抽象规则，也解释了为什么 skill 建了却不触发时，先改 description 而不是改正文。</p>
-
-<h3>5.4 自己动手：新增一个 skill / agent 的最小操作</h3>
-<p>两个文件、十行字，就是一份能跑的装备：</p>
-<pre><code># ~/.claude/skills/my-skill/SKILL.md
----
-name: my-skill
-description: 一句话说清"什么时候该用"——这是触发器，不是简介
----
-正文写方法本身：步骤、判据、格式示例。短就是好。</code></pre>
-<pre><code># ~/.claude/agents/my-agent.md
----
-name: my-agent
-description: 子代理的"岗位说明书"：它只做什么、不做什么
----
-系统提示词正文：角色、约束、输出格式。</code></pre>
-<p>改完<strong>秒级热加载</strong>，新会话即生效，不用重启。两个实战提醒：</p>
-<ul>
-<li>Windows 下务必确认文件是 <strong>UTF-8 编码</strong>——PowerShell 管道重定向保存的中文 frontmatter 可能变乱码，乱码的 description 会直接导致 skill/agent 不触发。建完后开个新会话喊一下名字验证它真的在场。</li>
-<li>不知道 skill 写得合不合格？用 <code>writing-skills</code> 自查，再用它的 <code>testing-skills-with-subagents.md</code> 方法派子代理实测一遍。</li>
-</ul>
-
-<h3>5.5 出处与安装：教程引用的 skill 从哪来</h3>
-<p>本教程点名的 skill 几乎都来自同一个仓库：<code>obra/superpowers</code>（GitHub 上 stars 最高的 Claude Code skills 集合之一，MIT 许可）。三种获取方式：</p>
-<pre><code># 方式一：插件市场（推荐，装全套）
-/plugin marketplace add obra/superpowers-marketplace
-/plugin install superpowers@superpowers-marketplace
-
-# 方式二：skills.sh CLI（系统终端，不是会话内）
-npx skills add https://github.com/obra/superpowers
-
-# 方式三：只要单个 skill
-npx skills add obra/superpowers --skill brainstorming</code></pre>
-<p>装完新开会话验证：<span class="kbd">/help</span> 能看到 <code>/superpowers:*</code> 命令，或让 agent 列出可用 skill。来源对照：</p>
-<table>
-  <tr><th style="width:250px">内容</th><th>出处</th></tr>
-  <tr><td><code>grilling</code>、<code>tdd</code>（即 test-driven-development）</td><td><code>obra/superpowers-marketplace</code>（经 skills.sh 按需安装）</td></tr>
-  <tr><td>5.1 中列出的其余 14 个 skill</td><td><code>obra/superpowers</code> 仓库 <code>skills/</code> 目录</td></tr>
-  <tr><td>子代理模板（想加更多时去抄）</td><td><code>VoltAgent/awesome-claude-code-subagents</code>（100+，拷进 <code>~/.claude/agents/</code> 即用）</td></tr>
-  <tr><td>更多现成 skill 的索引</td><td><code>hesreallyhim/awesome-claude-code</code> · <code>travisvn/awesome-claude-skills</code> · <code>anthropics/skills</code>（官方）</td></tr>
-</table>
-<div class="box info">
-<p><strong>一个易踩的误解</strong>：教程里多次出现的 <code>root-cause-tracing</code>、<code>defense-in-depth</code>、<code>testing-skills-with-subagents</code> <strong>不是独立 skill</strong>，而是 <code>systematic-debugging</code> 和 <code>writing-skills</code> 目录里的旁文件——拷 skill 时要拷<strong>整个目录</strong>，只拷 SKILL.md 会把它们弄丢。另外既然本机已有同源的 <code>tdd</code>，就不要再装 <code>test-driven-development</code>：同一规则两份副本，改了一处忘了另一处，两处指令迟早打架。</p>
+<div class="box dark">
+<p><strong>查根因派子代理，修 bug 自己来。</strong>查根因是「读一堆文件、只要一个结论」，正合子代理的活；修是「改一处、跑一次、再改」，需要连续上下文，拆出去反而来回三趟。</p>
 </div>
-<p><strong>自建 vs 拿来</strong>：通用方法用社区的（维护成本低、经过大量实战校验），<strong>你项目特有的坑和约定才值得写成自己的 skill</strong>——那部分是任何人拿不走的资产，也是第 7 步「坑固化成 skill」的落脚点。</p>
 
-<h2 id="c6"><span class="no">6</span>翻车急救与红线</h2>
+<p><strong>两条纪律</strong>：</p>
+<ul>
+<li><strong>先查不修</strong> —— 没定位到根因就动手，改的是症状，下次换个入口还会坏</li>
+<li><strong>根因写回 SPEC/PLAN</strong> —— 防再犯的那句话，比修好的那行代码值钱</li>
+</ul>
+
+<h2 id="c4"><span class="no">4</span>上下文卫生：易腐资产怎么管</h2>
+
+<p>模型的工作记忆就是这段对话的全部。它不是硬盘，更像 <strong>RAM——会腐烂</strong>。腐烂有三个可观测信号：</p>
+
+<figure>
+<svg viewBox="0 0 860 300" xmlns="http://www.w3.org/2000/svg" font-family="PingFang SC,Microsoft YaHei,sans-serif">
+  <text x="430" y="24" text-anchor="middle" font-size="14" fill="#2C2C2A" font-weight="600">上下文健康度随对话长度衰减</text>
+  <line x1="60" y1="250" x2="800" y2="250" stroke="#888780" stroke-width="1.5"/>
+  <text x="800" y="270" text-anchor="end" font-size="11" fill="#888780">对话长度 →</text>
+  <line x1="60" y1="250" x2="60" y2="50" stroke="#888780" stroke-width="1.5"/>
+  <text x="40" y="150" font-size="11" fill="#888780" transform="rotate(-90 46 150)">产出质量</text>
+  <path d="M60,70 C 250,72 380,80 470,120 C 560,160 660,210 780,238" stroke="#A32D2D" stroke-width="2.5" fill="none" stroke-dasharray="6 4"/>
+  <line x1="500" y1="50" x2="500" y2="250" stroke="#3B6D11" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <circle cx="330" cy="95" r="5" fill="#854F0B"/>
+  <path d="M330,95 L275,50" stroke="#854F0B" stroke-width="1" fill="none"/>
+  <text x="270" y="46" text-anchor="end" font-size="11" fill="#854F0B">信号一：开始重复你说过的要求</text>
+  <circle cx="620" cy="176" r="5" fill="#854F0B"/>
+  <path d="M620,176 L672,141" stroke="#854F0B" stroke-width="1" fill="none"/>
+  <text x="680" y="138" font-size="11" fill="#854F0B">信号二：顺手改你没让它改的地方</text>
+  <circle cx="716" cy="214" r="5" fill="#854F0B"/>
+  <path d="M716,214 L672,231" stroke="#854F0B" stroke-width="1" fill="none"/>
+  <text x="664" y="236" text-anchor="end" font-size="11" fill="#854F0B">信号三：为错误辩解而不是修</text>
+  <rect x="512" y="52" width="280" height="52" rx="8" fill="#EAF3DE" stroke="#C0DD97"/>
+  <text x="652" y="72" text-anchor="middle" font-size="12" fill="#3B6D11" font-weight="600">命中任一条 → 立刻停</text>
+  <text x="652" y="92" text-anchor="middle" font-size="12" fill="#3B6D11">写 HANDOFF.md → /clear 重开</text>
+</svg>
+<figcaption>三个信号都是「腐烂」而不是「能力不足」——继续硬聊只会更差，重启才是省钱解</figcaption>
+</figure>
+
+<h3>为什么是 /clear 而不是 /compact</h3>
+<p><code>/compact</code> 保留了连续性，但没给模型 clean slate——它会「以为」自己快到上限，提前收尾（context anxiety）。<strong>长任务 = 短会话 + 结构化 handoff，不是一个长会话反复压缩。</strong></p>
+<p>例外：同一件事还在推进、只是对话变长，<code>/compact</code> 更划算。判断标准是<strong>任务是否还连续</strong>，不是 token 还剩多少。</p>
+
+<h3>状态栏就是仪表盘</h3>
+<p><code>ctx N%</code>：&lt;50% 绿、50–79% 黄、≥80% 红。到黄就该想收尾，到红基本只能 <code>/clear</code>。</p>
+
+<h3>顺手要用的</h3>
+<table>
+  <tr><th style="width:200px">操作</th><th>干什么</th></tr>
+  <tr><td><span class="kbd">/rename 会话名</span></td><td>给会话命名，方便之后找回</td></tr>
+  <tr><td><span class="kbd">/resume 会话名</span></td><td>切回某个会话</td></tr>
+  <tr><td><span class="kbd">/btw 问题</span></td><td>顺手一问，不污染主上下文</td></tr>
+  <tr><td><span class="kbd">Ctrl+G</span></td><td>把计划/长文本丢进编辑器手改</td></tr>
+  <tr><td><span class="kbd">Esc Esc</span></td><td>回滚到上一轮</td></tr>
+</table>
+<div class="box warn"><p><strong>打断操作</strong>：发现不对——重复要求、顺手改没让改的地方、为错误辩解——立刻按 <span class="kbd">Esc</span> 打断，不要让错误继续累积。</p></div>
+
+<h2 id="c5"><span class="no">5</span>红线</h2>
 
 <table>
-  <tr><th style="width:230px">症状</th><th>急救</th></tr>
-  <tr><td>AI 开始重复你早说过的要求 / 顺手改没让它改的 / 为错误辩解</td><td>会话卫生三信号，立刻：写 HANDOFF → <span class="kbd">/clear</span> → 新会话读 SPEC/PLAN/HANDOFF 继续</td></tr>
-  <tr><td>测试一直是绿的，但你明明还没实现</td><td>测试写废了（断言了不存在的东西恒真）。回到闸门一：验证测试本身能红</td></tr>
-  <tr><td>代码「看起来能跑」但线上静默出错</td><td>AI 坑之二静默失败。全局搜 <code>catch</code> 与空 fallback，逐个补日志/上抛</td></tr>
-  <tr><td>调用了一个查无此人的 API</td><td>幻觉 API。静态语言看类型检查，动态语言实际跑一次；接 context7 类文档 MCP 治本</td></tr>
-  <tr><td>改到一半思路错了，补丁越叠越厚</td><td><span class="kbd">Esc+Esc</span> 回滚到检查点，更新 SPEC/PLAN 写明根因，重新生成——不要原地续命</td></tr>
-  <tr><td>skill/agent 建了却不触发</td><td>多半是 frontmatter description 措辞太弱（上下文指针问题）或文件编码坏了，见 5.4</td></tr>
+  <tr><th style="width:300px">红线</th><th>为什么</th></tr>
+  <tr><td>已 push 的 commit 一律 <code>revert</code>，不 <code>reset</code></td><td>别人的仓库里已经有那份历史了</td></tr>
+  <tr><td><code>git reset --hard</code> 前先 <code>git status</code></td><td>会丢弃所有未提交改动且不可恢复</td></tr>
+  <tr><td>记不住但 commit 过的东西，<code>git reflog</code> 捞</td><td>只要 commit 存在过就能翻回来</td></tr>
+  <tr><td>承重代码没逐行读过，不许 commit</td><td>出问题时的第一责任人是你，不是 AI</td></tr>
+  <tr><td>不引新依赖，除非明确写进 SPEC</td><td>依赖是长期的维护成本，不是一行 import</td></tr>
 </table>
 
 <div class="box bad">
-<p><strong>三条红线（不展开 git 细节，只立规矩）</strong>：① 已 push 的 commit 一律 revert 不 reset；② <code>git reset --hard</code> 前必须先 <code>git status</code>——它会丢弃所有未提交改动且不可恢复；③ 真丢了 commit，<code>git reflog</code> 能救命，只要 commit 存在过就能翻回来。</p>
+<p><strong>前三条已经被机器接管</strong>：只要装了 Part II 阶段 7 的 PreToolUse 闸门，<code>git reset --hard</code>、<code>git clean -f</code>、<code>git push --force</code>、<code>git checkout -- .</code>、<code>git restore .</code> 会在执行前被拦截并说明后果。人的纪律会犯困，机器的不会。</p>
 </div>
+
+<h2 id="c6"><span class="no">6</span>速查：这个场景用谁</h2>
+
+<table>
+  <tr><th style="width:280px">你现在想干什么</th><th style="width:230px">用哪个</th><th style="width:110px">触发</th><th>别用哪个</th></tr>
+  <tr><td>需求还模糊，不知道要做什么</td><td><code>brainstorming</code></td><td>手动</td><td>直接写代码</td></tr>
+  <tr><td>方案想被狠捶</td><td><code>grilling</code></td><td>手动</td><td>自我感觉良好</td></tr>
+  <tr><td>需求清楚，但是多步任务</td><td><code>writing-plans</code></td><td>手动</td><td>边想边写</td></tr>
+  <tr><td>计划定了，自己动手</td><td><code>executing-plans</code></td><td>手动</td><td><code>subagent-driven-development</code>（二选一）</td></tr>
+  <tr><td>计划定了，任务彼此独立</td><td><code>subagent-driven-development</code> / <code>dispatching-parallel-agents</code></td><td>手动</td><td><code>executing-plans</code></td></tr>
+  <tr><td>写功能，要测试先于实现</td><td><code>tdd</code></td><td>自动</td><td>先写实现再补测试</td></tr>
+  <tr><td>报错了、测试挂了</td><td><code>systematic-debugging</code> / <code>@debugger</code></td><td>自动</td><td>直接猜着改</td></tr>
+  <tr><td>改完了，要不要提交</td><td><code>verification-before-completion</code> + <code>finishing-a-development-branch</code></td><td>自动 + 手动</td><td>凭感觉说「应该没问题」</td></tr>
+  <tr><td>要合并了</td><td><code>/code-review</code></td><td>手动</td><td><code>requesting-code-review</code>（更轻）</td></tr>
+  <tr><td>收到别人的审查意见</td><td><code>receiving-code-review</code></td><td>自动</td><td>无脑照改</td></tr>
+  <tr><td>觉得代码写复杂了</td><td><code>/simplify</code> 或 <code>ponytail-review</code></td><td>手动</td><td>两个都跑</td></tr>
+  <tr><td>全仓体检过度设计</td><td><code>ponytail-audit</code></td><td>手动</td><td><code>ponytail-review</code>（只看 diff）</td></tr>
+  <tr><td>要造一个 skill</td><td><code>writing-skills</code></td><td>手动</td><td>手搓目录</td></tr>
+  <tr><td>会话跑崩了想复盘</td><td><code>diagnosing-superpowers</code></td><td>手动</td><td>—</td></tr>
+</table>
+
+<div class="box info"><p><strong>手动</strong>的必须打 <code>/名字</code> 或明说「用 X」，它不会自己出现；<strong>自动</strong>的到点自己接管，不用管。</p></div>
+
+<h2 id="c7"><span class="no">7</span>从零配置清单：12 个阶段</h2>
+
+<p>从空白机器到当前配置的全部步骤。按顺序做，每步末尾都有验证命令。<strong>目标环境：Windows 11 + Git Bash，配置目录 <code>~/.claude</code>。</strong></p>
+
+<div class="box good">
+<p><strong>最终形态</strong>：1 个模型端点 + 2 个插件 + 15 个本地 skill + 2 个 sub-agent + 5 类 hook + 1 个状态栏 + 1 个 MCP。</p>
+</div>
+
+<div class="box info">
+<p><strong>配套文件都在本仓库 <code>config/</code> 目录</strong>：<code>settings.json.template</code>、<code>hooks/gate.js</code>、<code>hooks/gate.test.js</code>、<code>statusline.js</code>、<code>agents/</code>、<code>templates/</code>、<code>commands/</code>、<code>CLAUDE.md</code>。照着清单做的时候直接复制，不用手敲。</p>
+</div>
+
+<div class="step-item">
+<div class="kicker">阶段 0</div>
+<h3>装 CLI</h3>
+<pre><code>npm i -g @anthropic-ai/claude-code
+claude --version          # 应输出当前版本号</code></pre>
+<p>装好后先跑一次 <code>claude</code>，让它生成 <code>~/.claude/settings.json</code> 骨架，再往下改。</p>
+</div>
+
+<div class="step-item">
+<div class="kicker">阶段 1</div>
+<h3>目录骨架</h3>
+<pre><code>cd ~/.claude
+mkdir -p hooks agents skills templates commands backups</code></pre>
+<pre><code>~/.claude/
+├── settings.json          配置总入口
+├── CLAUDE.md              全局行为规则
+├── statusline.js          状态栏脚本
+├── hooks/gate.js          闸门（PreToolUse + Stop）
+├── hooks/gate.test.js     闸门自检
+├── agents/                debugger.md、verifier.md
+├── skills/                15 个目录，每个一份 SKILL.md
+├── templates/             CLAUDE / SPEC / PLAN / HANDOFF / verify.json / README
+├── commands/              /chinese /en /english /zh
+└── backups/               每次改动前的备份</code></pre>
+</div>
+
+<div class="step-item">
+<div class="kicker">阶段 2</div>
+<h3>模型接入（settings.json 的 env）</h3>
+<pre><code>"env": {
+  "ANTHROPIC_BASE_URL": "&lt;你的 Anthropic 兼容端点&gt;",
+  "ANTHROPIC_AUTH_TOKEN": "&lt;你的 token&gt;",
+  "ANTHROPIC_MODEL": "&lt;模型名&gt;",
+  "ANTHROPIC_DEFAULT_OPUS_MODEL": "&lt;模型名&gt;",
+  "ANTHROPIC_DEFAULT_SONNET_MODEL": "&lt;模型名&gt;",
+  "ANTHROPIC_DEFAULT_HAIKU_MODEL": "&lt;模型名&gt;",
+  "ANTHROPIC_DEFAULT_FABLE_MODEL": "&lt;模型名&gt;",
+  "CLAUDE_CODE_SUBAGENT_MODEL": "&lt;模型名&gt;",
+  "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+}</code></pre>
+<p>兼容端点可以接任何 Anthropic 协议的服务（阿里云百炼、DeepSeek、智谱等），填它给你的 base_url 和模型名即可。</p>
+<p><strong>三条经验</strong>：</p>
+<ol>
+<li><strong>明文 token 是隐患。</strong>能挪到系统环境变量就挪；挪不了，至少别让这个文件进任何仓库。</li>
+<li><strong>所有角色指向同一个模型 = 没有分层。</strong>规划、审查、子代理全在一个模型上，这是能力天花板。</li>
+<li><strong>兼容端点常有不支持的能力。</strong>部分端点不支持 <code>text.format</code> 结构化输出，带 <code>json_schema</code> 的请求会被 400 拒绝——报错时先怀疑端点差异。</li>
+</ol>
+<p>验证：<code>claude</code> 能正常对话，<code>/status</code> 里显示的模型名正确。</p>
+</div>
+
+<div class="step-item">
+<div class="kicker">阶段 3</div>
+<h3>settings.json 其余部分</h3>
+<pre><code>{
+  "statusLine": {
+    "type": "command",
+    "command": "node C:/Users/&lt;你的用户名&gt;/.claude/statusline.js"
+  },
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "node", "args": ["C:\\Users\\&lt;你的用户名&gt;\\.claude\\hooks\\gate.js"], "timeout": 10 }] }
+    ],
+    "Stop": [
+      { "matcher": "",
+        "hooks": [{ "type": "command", "command": "node", "args": ["C:\\Users\\&lt;你的用户名&gt;\\.claude\\hooks\\gate.js"], "timeout": 200 }] }
+    ]
+  },
+  "enabledPlugins": {
+    "ponytail@ponytail": true,
+    "code-review@claude-plugins-official": true
+  },
+  "modelSettings": {
+    "&lt;模型名&gt;": { "effortLevel": "xhigh" }
+  }
+}</code></pre>
+<div class="box warn">
+<p><strong>三个坑</strong>：① <code>args</code> 里的 Windows 路径要用<strong>双反斜杠</strong>，写成单反斜杠会被吞；② <code>Stop</code> 的 timeout 要足够长（200 秒），跑测试会用到；③ <strong>改完必须重启 CLI 才生效。</strong></p>
+</div>
+<p>验证：<code>claude</code> 启动后底部出现状态栏，形如 <code>模型 │ 目录 │ (分支) │ ctx 3%</code>。</p>
+</div>
+
+<div class="step-item">
+<div class="kicker">阶段 4</div>
+<h3>全局 CLAUDE.md</h3>
+<p><code>~/.claude/CLAUDE.md</code> 会被每次会话自动加载。必须写的三块：</p>
+<table>
+  <tr><th style="width:200px">块</th><th>内容</th></tr>
+  <tr><td><strong>语言</strong></td><td>始终简体中文；代码注释、commit、文档默认中文；专有名词保留英文但要中文解释</td></tr>
+  <tr><td><strong>选择场景强制中文</strong></td><td>凡是让用户做选择，选项一律中文，禁止 Yes/No/Allow/Proceed</td></tr>
+  <tr><td><strong>目标驱动</strong></td><td>命令式任务转成可验证目标；多步任务先给计划，每步标注验证方式</td></tr>
+</table>
+<p>编码风格那块<strong>不要自己写</strong>——交给 ponytail 插件，否则两套规则打架。</p>
+<div class="box warn"><p><strong>宿主机上的 <code>AGENTS.md</code> 如果也存在，改成只指向上面的 CLAUDE.md</strong>，别复制一遍内容。两份同时注入就是双倍 token 加双倍冲突。</p></div>
+<p>完整样例见仓库 <code>config/CLAUDE.md</code>。</p>
+</div>
+
+<div class="step-item">
+<div class="kicker">阶段 5</div>
+<h3>Skills：15 个，触发方式分两档</h3>
+<p>从 <code>obra/superpowers</code> 拷进 <code>~/.claude/skills/</code>，最终 15 个（本仓库 <code>skills/</code> 有完整副本）：</p>
+<table>
+  <tr><th style="width:170px">组</th><th>Skill</th></tr>
+  <tr><td>需求与计划</td><td><code>brainstorming</code> <code>grilling</code> <code>writing-plans</code> <code>executing-plans</code> <code>subagent-driven-development</code> <code>dispatching-parallel-agents</code></td></tr>
+  <tr><td>编码与调试</td><td><code>tdd</code> <code>systematic-debugging</code></td></tr>
+  <tr><td>审查与收尾</td><td><code>receiving-code-review</code> <code>verification-before-completion</code> <code>finishing-a-development-branch</code></td></tr>
+  <tr><td>工程习惯</td><td><code>using-git-worktrees</code> <code>writing-skills</code> <code>diagnosing-superpowers</code> <code>requesting-code-review</code></td></tr>
+</table>
+<p><strong>关键决策：触发方式要分两档。</strong></p>
+<table>
+  <tr><th style="width:100px">档</th><th style="width:230px">做法</th><th>适合谁</th></tr>
+  <tr><td>自动</td><td><code>description</code> 保留原文</td><td>便宜、漏了要命、信号明确：<code>tdd</code>、<code>systematic-debugging</code>、<code>receiving-code-review</code>、<code>verification-before-completion</code></td></tr>
+  <tr><td>手动</td><td><code>description</code> 改成「仅在用户明确要求时调用」</td><td>正文大、误触发贵、需要你拍板：其余 11 个</td></tr>
+</table>
+<p>改完本地常驻描述从 2607 字符降到 820。<strong>收益不是省 token（只占 1.7%），是减少「该调哪个」的歧义。</strong></p>
+<p>验证：<code>ls ~/.claude/skills</code> 应列出 15 个目录。</p>
+</div>
+
+<div class="step-item">
+<div class="kicker">阶段 6</div>
+<h3>Sub-agents：只读，是独立验收的前提</h3>
+<p><code>~/.claude/agents/</code> 下每个 <code>.md</code>，<strong>frontmatter 必须有 <code>name</code> 和 <code>description</code></strong>，否则不加载。</p>
+<pre><code>---
+name: verifier
+description: 独立验收者：只读不改，亲自运行验收命令，用命令+输出+退出码逐条判定达标/未达标/没测到，结论只能是 PASS/FAIL/BLOCKED。
+tools: Read, Bash, Grep, Glob
+model: inherit
+---</code></pre>
+<table>
+  <tr><th style="width:120px">Agent</th><th>作用</th><th>关键设定</th></tr>
+  <tr><td><code>debugger</code></td><td>系统化排障：复现 → 定位 → 最小修复 → 验证</td><td>无复现不修复</td></tr>
+  <tr><td><code>verifier</code></td><td>独立验收</td><td><strong>只读</strong>；只有 Read/Bash/Grep/Glob，没有 Write/Edit</td></tr>
+</table>
+<div class="box info"><p><code>verifier</code> 不给写权限，是它能做独立验收的前提——<strong>不是靠它自觉。</strong></p></div>
+<p>验证：<code>ls ~/.claude/agents</code> 有两个文件，开新会话时 <code>/agents</code> 里能看到。</p>
+</div>
+
+<div class="step-item">
+<div class="kicker">阶段 7</div>
+<h3>Hooks 与状态栏</h3>
+<h3 style="font-size:15px">statusline.js</h3>
+<p>读 stdin 的 JSON，输出 <code>模型 │ 目录 │ (分支) │ ctx N%</code>。用到的字段：</p>
+<pre><code>model.display_name · workspace.current_dir · context_window.used_percentage</code></pre>
+<p>宽度不够时砍掉分支，别砍上下文百分比——那是唯一的仪表盘。</p>
+<h3 style="font-size:15px">gate.js（一套脚本管两个事件）</h3>
+<table>
+  <tr><th style="width:180px">事件</th><th>行为</th></tr>
+  <tr><td><code>PreToolUse(Bash)</code></td><td>拦 <code>git reset --hard</code>、<code>git clean -f</code>、<code>git push --force</code>、<code>git checkout -- .</code>、<code>git restore .</code>；exit 2 并说明后果</td></tr>
+  <tr><td><code>Stop</code></td><td>工作区有改动时跑项目测试；通过则零输出，失败则 exit 2 + 回传最后 30 行</td></tr>
+</table>
+<p>Stop 闸门的三条自我保护：</p>
+<ul>
+<li><code>stop_hook_active</code> 为真时放行，避免死循环</li>
+<li>同一份 diff 只验一次（按 <code>git status</code> + <code>git diff HEAD</code> 做指纹）</li>
+<li>找不到可靠测试命令时<strong>直接放行</strong>，不猜</li>
+</ul>
+<p>测试命令识别顺序：</p>
+<table>
+  <tr><th style="width:100px">顺序</th><th>找什么</th></tr>
+  <tr><td>1</td><td>项目 <code>.claude/verify.json</code></td></tr>
+  <tr><td>2</td><td>根目录 <code>package.json</code> 的 <code>scripts.test</code></td></tr>
+  <tr><td>3</td><td><code>.venv/Scripts/python.exe</code> + <code>tests/</code> → <code>pytest -q</code></td></tr>
+  <tr><td>4</td><td>都没有 → 放行</td></tr>
+</table>
+<p>验证：</p>
+<pre><code>node ~/.claude/hooks/gate.test.js     # 应输出「gate.js 自检全部通过」</code></pre>
+</div>
+
+<div class="step-item">
+<div class="kicker">阶段 8</div>
+<h3>插件</h3>
+<pre><code>claude plugin marketplace add DietrichGebert/ponytail
+claude plugin install ponytail@ponytail
+claude plugin install code-review@claude-plugins-official
+claude plugin list                    # 两个都应为 enabled</code></pre>
+<table>
+  <tr><th style="width:130px">插件</th><th>作用</th><th>代价</th></tr>
+  <tr><td><code>ponytail</code></td><td>编码纪律：YAGNI → 复用 → 标准库 → 原生 → 已有依赖 → 一行 → 最小实现</td><td>每次会话注入约 1750 token</td></tr>
+  <tr><td><code>code-review</code></td><td><code>/code-review</code> 审当前 diff 或 PR</td><td>可忽略</td></tr>
+</table>
+<div class="box info"><p><strong>ponytail 的注入是常驻成本里最大的一项</strong>，但它管的是写代码的风格，关掉省下的 token 远不够补回多写的代码——留着。</p></div>
+</div>
+
+<div class="step-item">
+<div class="kicker">阶段 9</div>
+<h3>MCP：只装一个</h3>
+<pre><code>claude mcp add --scope user context7 -- cmd /c npx -y @upstash/context7-mcp
+claude mcp list          # context7 应为 Connected</code></pre>
+<div class="box warn"><p>只装一个就够。<strong>MCP 的每个工具 schema 都常驻上下文</strong>，装十个不如把 <code>gh</code> CLI 装上——后者零常驻成本。</p></div>
+</div>
+
+<div class="step-item">
+<div class="kicker">阶段 10</div>
+<h3>模板：不自动加载，只在建项目时复制</h3>
+<p><code>~/.claude/templates/</code> 放六份，本仓库 <code>config/templates/</code> 有完整副本：</p>
+<table>
+  <tr><th style="width:230px">文件</th><th>复制到</th></tr>
+  <tr><td><code>CLAUDE.md.template</code></td><td><code>&lt;仓库&gt;/CLAUDE.md</code></td></tr>
+  <tr><td><code>SPEC.md.template</code></td><td><code>&lt;仓库&gt;/SPEC.md</code></td></tr>
+  <tr><td><code>PLAN.md.template</code></td><td><code>&lt;仓库&gt;/PLAN.md</code></td></tr>
+  <tr><td><code>HANDOFF.md.template</code></td><td><code>&lt;仓库&gt;/HANDOFF.md</code></td></tr>
+  <tr><td><code>verify.json.template</code></td><td><code>&lt;仓库&gt;/.claude/verify.json</code></td></tr>
+  <tr><td><code>README.md</code></td><td>不复制，是用法说明</td></tr>
+</table>
+</div>
+
+<div class="step-item">
+<div class="kicker">阶段 11</div>
+<h3>每个新项目要做的四件事</h3>
+<table>
+  <tr><th style="width:220px">做不做</th><th>判断</th></tr>
+  <tr><td><strong>让闸门能跑</strong></td><td>标准 pytest / npm 项目零配置；测试是自定义脚本才写 <code>verify.json</code></td></tr>
+  <tr><td><strong>建一个空 <code>tests/</code> 目录</strong></td><td>比写十条规范都有效——模型只往已存在的目录放文件</td></tr>
+  <tr><td><strong>建 <code>CLAUDE.md</code></strong></td><td>从模板复制，写清启动命令、测试命令、<strong>测试放哪</strong></td></tr>
+  <tr><td><strong><code>git init</code> + 首次 commit</strong></td><td>没有 commit 就没有回滚点</td></tr>
+</table>
+<div class="box bad">
+<p><strong>闸门这一条最容易漏，也最致命。</strong>漏了它不会报错，只会静默放行——你以为有保护，其实裸奔。</p>
+<p><strong>测试位置同理。</strong>项目里没有 <code>tests/</code> 时，模型会跟着现有结构把测试塞进 <code>scripts/</code>，因为新建目录比复用现有目录「改动更大」。等它塞了十几个文件再搬家，就是大工程。</p>
+</div>
+</div>
+
+<div class="step-item">
+<div class="kicker">阶段 12</div>
+<h3>总验收</h3>
+<pre><code>claude --version                      # 版本号正确
+claude plugin list                    # ponytail、code-review 均 enabled
+claude mcp list                       # context7 Connected
+node ~/.claude/hooks/gate.test.js     # gate.js 自检全部通过
+ls ~/.claude/skills | wc -l           # 15
+ls ~/.claude/agents                   # debugger.md、verifier.md
+ls ~/.claude/templates                # 6 个文件</code></pre>
+<p>再开一个新会话说一句「你好」，检查三件事：<strong>① 底部有状态栏；② 回复是中文；③ ctx 百分比在个位数。</strong>三条都对，配置就到位了。</p>
+</div>
+
+<h2 id="c8"><span class="no">8</span>文件地图与维护约定</h2>
+
+<h3>8.1 本仓库目录</h3>
+<pre><code>ai-coding-playbook/
+├── AICoding进阶教程.html     ← 本页（单文件，双击即开）
+├── Claude-Code-使用手册.md   ← 使用手册（Markdown 版）
+├── 从零配置清单.md           ← 配置清单（Markdown 版）
+├── config/                  ← 可直接复制的配置资产
+│   ├── CLAUDE.md                全局指令样例
+│   ├── settings.json.template   settings 模板（脱敏）
+│   ├── statusline.js            状态栏脚本
+│   ├── hooks/gate.js            闸门（PreToolUse + Stop）
+│   ├── hooks/gate.test.js       闸门自检
+│   ├── agents/debugger.md       排障子代理
+│   ├── agents/verifier.md       验收子代理
+│   ├── templates/               6 份项目模板
+│   └── commands/                /chinese /en /english /zh
+└── skills/                  ← 15 个 skill 完整副本 + 安装脚本</code></pre>
+
+<h3>8.2 本机文件在哪</h3>
+<table>
+  <tr><th style="width:200px">文件</th><th>位置</th></tr>
+  <tr><td>全局规则</td><td><code>~/.claude/CLAUDE.md</code></td></tr>
+  <tr><td>项目模板</td><td><code>~/.claude/templates/</code>（CLAUDE / SPEC / PLAN / HANDOFF / verify.json）</td></tr>
+  <tr><td>闸门脚本</td><td><code>~/.claude/hooks/gate.js</code>，自检 <code>gate.test.js</code></td></tr>
+  <tr><td>状态栏</td><td><code>~/.claude/statusline.js</code></td></tr>
+  <tr><td>skill</td><td><code>~/.claude/skills/</code>（15 个）</td></tr>
+  <tr><td>配置总入口</td><td><code>~/.claude/settings.json</code></td></tr>
+</table>
+
+<h3>8.3 维护约定</h3>
+<ul>
+<li><strong>改 <code>settings.json</code> 前先备份</strong>到 <code>~/.claude/backups/</code>，改完重启。</li>
+<li><strong>改 skill 前先备份</strong>，因为插件升级会覆盖插件目录下的文件，本地目录不会。</li>
+<li><strong>每加一个 hook，先写自检</strong>。闸门自己挂了比没有闸门更危险——它会静默放行，你还以为有保护。</li>
+</ul>
 
 <h2>结语：判断自己升级了没有</h2>
 
@@ -538,7 +735,6 @@ npx skills add obra/superpowers --skill brainstorming</code></pre>
 <li>每踩一个坑，产出物里多一个 skill 或多一行 CLAUDE.md，而不是多一声抱怨。</li>
 </ol>
 <p>三条都做到，你就已经从「用过」毕业了。</p>
-
 </div>
 </body>
 </html>

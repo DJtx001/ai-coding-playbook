@@ -1,0 +1,4 @@
+{
+  "command": "npm test",
+  "timeout": 180
+}

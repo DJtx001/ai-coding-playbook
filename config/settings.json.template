@@ -1,0 +1,52 @@
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "<你的 Anthropic 兼容端点>",
+    "ANTHROPIC_AUTH_TOKEN": "<你的 token>",
+    "ANTHROPIC_MODEL": "<模型名>",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "<模型名>",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "<模型名>",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "<模型名>",
+    "ANTHROPIC_DEFAULT_FABLE_MODEL": "<模型名>",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "<模型名>",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "node C:/Users/<你的用户名>/.claude/statusline.js"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["C:\\Users\\<你的用户名>\\.claude\\hooks\\gate.js"],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["C:\\Users\\<你的用户名>\\.claude\\hooks\\gate.js"],
+            "timeout": 200
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "ponytail@ponytail": true,
+    "code-review@claude-plugins-official": true
+  },
+  "modelSettings": {
+    "<模型名>": { "effortLevel": "xhigh" }
+  }
+}
